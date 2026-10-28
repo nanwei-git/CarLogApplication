@@ -74,6 +74,9 @@ export function getCarVin(): string {
 export function setCarId(v: string): void {
   AppStorage.setOrCreate(StorageKeys.carId, v)
 }
+export function getCarId(): string {
+  return (AppStorage.get(StorageKeys.carId) as string) ?? ''
+}
 export function setAvatar(v: string): void {
   AppStorage.setOrCreate(StorageKeys.avatar, v)
 }

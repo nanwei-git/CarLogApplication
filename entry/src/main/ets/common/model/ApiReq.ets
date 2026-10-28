@@ -23,3 +23,8 @@ export interface BindReq {
 // 无参请求体（如 /app/user/info），避免无类型对象字面量
 export class EmptyReq {
 }
+
+// 车辆相关请求体（接口 4.5 车辆信息）
+export interface CarInfoReq {
+  carId: string
+}

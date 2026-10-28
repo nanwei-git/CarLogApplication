@@ -2,6 +2,7 @@
 import { IResult } from '../model/IResult'
 import { UserInfoBean } from '../model/UserInfoBean'
 import { RegisterReq } from '../model/ApiReq'
+import { CarInfoBean } from '../model/CarInfoBean'
 
 export function mockLogin(username: string, password: string): Promise<IResult> {
   return new Promise<IResult>((resolve) => {
@@ -28,5 +29,30 @@ export function mockRegister(req: RegisterReq): Promise<IResult> {
 export function mockBindCar(carVin: string): Promise<IResult> {
   return new Promise<IResult>((resolve) => {
     resolve({ code: 200, msg: 'mock 绑车成功' })
+  })
+}
+
+// 车辆信息（接口 4.5）：与真接口字段一致，便于离线验收 UI
+export function mockGetCarInfo(): Promise<CarInfoBean> {
+  return new Promise<CarInfoBean>((resolve) => {
+    const bean: CarInfoBean = new CarInfoBean()
+    bean.id = '1'
+    bean.carName = '小米SU7'
+    bean.brand = '小米'
+    bean.carVin = '00661718330'
+    bean.batteryPower.power = '62.5'
+    bean.batteryPower.percent = 78
+    bean.enduranceMileage = '520'
+    bean.batteryCapacity = '73.6'
+    bean.nominalVoltage = '400'
+    bean.horsePower = '299'
+    bean.maxPower = '220'
+    bean.maxTorque = '400'
+    bean.carSize = '4997×1963×1455'
+    bean.wheelBase = '3000'
+    bean.totalTripNum = 128
+    bean.totalTripMile = '8632'
+    bean.createYm = '2026-10'
+    resolve(bean)
   })
 }
