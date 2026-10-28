@@ -38,3 +38,32 @@ export function clearSession(): void {
   AppStorage.setOrCreate(StorageKeys.carId, '')
   AppStorage.setOrCreate(StorageKeys.avatar, '')
 }
+
+// 各字段存取（token/user/car）封装，统一走 AppStorage
+export function setToken(v: string): void {
+  AppStorage.setOrCreate(StorageKeys.token, v)
+}
+export function getToken(): string {
+  return (AppStorage.get(StorageKeys.token) as string) ?? ''
+}
+export function setUserName(v: string): void {
+  AppStorage.setOrCreate(StorageKeys.userName, v)
+}
+export function getUserName(): string {
+  return (AppStorage.get(StorageKeys.userName) as string) ?? ''
+}
+export function setUserId(v: string): void {
+  AppStorage.setOrCreate(StorageKeys.userId, v)
+}
+export function setCarVin(v: string): void {
+  AppStorage.setOrCreate(StorageKeys.carVin, v)
+}
+export function getCarVin(): string {
+  return (AppStorage.get(StorageKeys.carVin) as string) ?? ''
+}
+export function setCarId(v: string): void {
+  AppStorage.setOrCreate(StorageKeys.carId, v)
+}
+export function setAvatar(v: string): void {
+  AppStorage.setOrCreate(StorageKeys.avatar, v)
+}
