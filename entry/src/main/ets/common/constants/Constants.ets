@@ -34,6 +34,11 @@ export const VIN_MIN_LEN: number = 4
 export const VIN_MAX_LEN: number = 17
 export const BENCH_VIN: string = '4494356c' // 台架调试 VIN（个人 VIN 不可用于台架）
 
+// 设置：字号档位（KT10 持久化）
+export const FONT_SMALL: number = 0.9
+export const FONT_NORMAL: number = 1.0
+export const FONT_LARGE: number = 1.15
+
 // 车辆移动方向（接口 4.8）：按下移动、松开停车
 export const MOVE_FRONT: string = 'front'
 export const MOVE_BACK: string = 'back'

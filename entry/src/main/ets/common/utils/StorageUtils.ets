@@ -9,6 +9,8 @@ interface StorageKeyMap {
   carVin: string
   carId: string
   avatar: string
+  fontScale: string // 设置：字号缩放（KT10）
+  darkMode: string // 设置：深色主题（KT10）
 }
 
 export const StorageKeys: StorageKeyMap = {
@@ -18,7 +20,9 @@ export const StorageKeys: StorageKeyMap = {
   userName: 'userName',
   carVin: 'carVin',
   carId: 'carId',
-  avatar: 'avatar'
+  avatar: 'avatar',
+  fontScale: 'fontScale',
+  darkMode: 'darkMode'
 }
 
 // 模块加载即把下列键挂到持久化（重启后自动回填）
@@ -29,6 +33,8 @@ PersistentStorage.persistProp(StorageKeys.userName, '')
 PersistentStorage.persistProp(StorageKeys.carVin, '')
 PersistentStorage.persistProp(StorageKeys.carId, '')
 PersistentStorage.persistProp(StorageKeys.avatar, '')
+PersistentStorage.persistProp(StorageKeys.fontScale, 1.0)
+PersistentStorage.persistProp(StorageKeys.darkMode, false)
 
 export function getIsLogin(): boolean {
   return AppStorage.get(StorageKeys.isLogin) as boolean
@@ -79,4 +85,18 @@ export function getCarId(): string {
 }
 export function setAvatar(v: string): void {
   AppStorage.setOrCreate(StorageKeys.avatar, v)
+}
+
+// 设置项（字号 / 主题，KT10 持久化）
+export function setFontScale(v: number): void {
+  AppStorage.setOrCreate(StorageKeys.fontScale, v)
+}
+export function getFontScale(): number {
+  return (AppStorage.get(StorageKeys.fontScale) as number) ?? 1.0
+}
+export function setDarkMode(v: boolean): void {
+  AppStorage.setOrCreate(StorageKeys.darkMode, v)
+}
+export function getDarkMode(): boolean {
+  return (AppStorage.get(StorageKeys.darkMode) as boolean) ?? false
 }

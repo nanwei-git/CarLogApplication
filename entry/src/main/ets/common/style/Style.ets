@@ -41,3 +41,38 @@ export const BG_GRADIENT: LinearGradient = {
     [COLORS.bg3, 1.0] as [string, number]
   ]
 }
+
+// 深色令牌（设置页"深色主题"开关用，KT10 持久化）
+export const COLORS_DARK: AppColors = {
+  bg0: '#0F1F1C',
+  bg1: '#14302A',
+  bg2: '#123B36',
+  bg3: '#0E3A38',
+  card: 'rgba(255,255,255,0.10)',
+  line: 'rgba(255,255,255,0.18)',
+  ink: '#E8F5F1',
+  inkSub: '#9FBDB6',
+  accent: '#3FB9A2',
+  accentDeep: '#59D3BD',
+  highlight: '#F6E7A9',
+  danger: '#E58A8A'
+}
+
+export const BG_GRADIENT_DARK: LinearGradient = {
+  direction: GradientDirection.Bottom,
+  colors: [
+    [COLORS_DARK.bg0, 0.0] as [string, number],
+    [COLORS_DARK.bg1, 0.35] as [string, number],
+    [COLORS_DARK.bg2, 0.7] as [string, number],
+    [COLORS_DARK.bg3, 1.0] as [string, number]
+  ]
+}
+
+// 主题选择：true 深色 / false 浅色（用户色卡）
+export function palette(dark: boolean): AppColors {
+  return dark ? COLORS_DARK : COLORS
+}
+
+export function bgGradient(dark: boolean): LinearGradient {
+  return dark ? BG_GRADIENT_DARK : BG_GRADIENT
+}

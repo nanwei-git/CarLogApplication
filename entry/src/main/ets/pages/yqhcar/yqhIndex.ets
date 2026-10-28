@@ -7,6 +7,8 @@ import { YqhControl } from './yqhControl'
 import { YqhFeedback } from './yqhFeedback'
 import { YqhFeedbackAdd } from './yqhFeedbackAdd'
 import { YqhFeedbackDetail } from './yqhFeedbackDetail'
+import { YqhMine } from './yqhMine'
+import { YqhSettings } from './yqhSettings'
 
 @Entry
 @Component
@@ -28,6 +30,11 @@ struct YqhIndex {
         YqhFeedbackDetail({ feedbackId: param as string })
       }
       .title('反馈详情')
+    } else if (name === 'Settings') {
+      NavDestination() {
+        YqhSettings()
+      }
+      .title('设置')
     }
   }
 
@@ -68,13 +75,7 @@ struct YqhIndex {
         }.tabBar(this.tabBarBuilder('反馈', 2))
 
         TabContent() {
-          Column() {
-            Text('我的（M8+ 个人信息 / 换绑 / 设置）')
-              .fontColor(COLORS.ink)
-          }
-          .justifyContent(FlexAlign.Center)
-          .width('100%')
-          .height('100%')
+          YqhMine()
         }.tabBar(this.tabBarBuilder('我的', 3))
       }
       .onSelected((val: number) => {
