@@ -4,6 +4,9 @@ import { COLORS, BG_GRADIENT } from '../../common/style/Style'
 import { YqhCarInfoComp } from './comps/yqhCarInfoComp'
 import { YqhAirConditionComp } from './comps/yqhAirConditionComp'
 import { YqhControl } from './yqhControl'
+import { YqhFeedback } from './yqhFeedback'
+import { YqhFeedbackAdd } from './yqhFeedbackAdd'
+import { YqhFeedbackDetail } from './yqhFeedbackDetail'
 
 @Entry
 @Component
@@ -12,8 +15,20 @@ struct YqhIndex {
   @State currentIndex: number = 0
 
   // 详情页路由表（M2+ 按 name 渲染各 NavDestination）
+  // 详情页路由表（C5：列表→详情走 NavDestination 子页）
   @Builder
   pageMap(name: string, param: Object) {
+    if (name === 'FeedbackAdd') {
+      NavDestination() {
+        YqhFeedbackAdd()
+      }
+      .title('新增反馈')
+    } else if (name === 'FeedbackDetail') {
+      NavDestination() {
+        YqhFeedbackDetail({ feedbackId: param as string })
+      }
+      .title('反馈详情')
+    }
   }
 
   @Builder
@@ -49,13 +64,7 @@ struct YqhIndex {
         }.tabBar(this.tabBarBuilder('车控', 1))
 
         TabContent() {
-          Column() {
-            Text('反馈（M7+ 列表 / 新增 / 详情）')
-              .fontColor(COLORS.ink)
-          }
-          .justifyContent(FlexAlign.Center)
-          .width('100%')
-          .height('100%')
+          YqhFeedback()
         }.tabBar(this.tabBarBuilder('反馈', 2))
 
         TabContent() {

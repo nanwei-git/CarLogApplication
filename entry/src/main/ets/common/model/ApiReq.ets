@@ -35,6 +35,21 @@ export interface CarMoveReq {
   direction: string
 }
 
+// 反馈请求体（接口 4.9.1 列表 / 4.9.2 新增 / 4.9.3 详情 / 4.9.4 删除）
+export interface FeedbackPageReq {
+  pageNum: number
+  pageSize: number
+}
+
+export interface FeedbackAddReq {
+  content: string
+  status: string
+}
+
+export interface FeedbackIdReq {
+  id: string
+}
+
 // 车辆状态变更请求体（接口 4.7）：接口形态同 CarStateChange，独立声明避免 UI 层反向依赖 model
 export interface CarStateChange {
   carVin: string

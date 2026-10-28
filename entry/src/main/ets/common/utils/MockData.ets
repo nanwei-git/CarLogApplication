@@ -5,7 +5,16 @@ import { RegisterReq } from '../model/ApiReq'
 import { CarInfoBean } from '../model/CarInfoBean'
 import { CarStat } from '../model/CarStateBean'
 import { CarStateChange } from '../model/ApiReq'
-import { SWITCH_ON, SWITCH_OFF, TEMP_DEFAULT, MOCK_CAR_ID } from '../constants/Constants'
+import { Feedback, FeedBackListBean } from '../model/FeedBackBean'
+import {
+  SWITCH_ON,
+  SWITCH_OFF,
+  TEMP_DEFAULT,
+  MOCK_CAR_ID,
+  FEEDBACK_UNREAD,
+  FEEDBACK_READ,
+  DEL_NORMAL
+} from '../constants/Constants'
 
 export function mockLogin(username: string, password: string): Promise<IResult> {
   return new Promise<IResult>((resolve) => {
@@ -133,5 +142,86 @@ export function mockChangeCarState(req: CarStateChange): Promise<IResult> {
 export function mockMoveCar(direction: string): Promise<IResult> {
   return new Promise<IResult>((resolve) => {
     resolve({ code: 200, msg: 'mock 移动指令已下发：' + direction })
+  })
+}
+
+// ========== 反馈（接口 4.9.1–4.9.4）==========
+let mockFeedbacks: Feedback[] = []
+
+function initFeedbacks(): void {
+  mockFeedbacks = []
+  for (let i: number = 1; i <= 12; i++) {
+    const f: Feedback = new Feedback()
+    f.id = i.toString()
+    f.userId = '1'
+    f.userName = 'yqh'
+    f.nickName = '杨庆鸿'
+    f.content = '第 ' + i + ' 条反馈：车机在低温启动时响应较慢，希望优化。'
+    f.status = i % 2 === 0 ? FEEDBACK_READ : FEEDBACK_UNREAD
+    f.delFlag = DEL_NORMAL
+    f.createTime = '2026-10-' + (i < 10 ? '0' + i : i.toString()) + ' 10:00'
+    f.reply = i % 3 === 0 ? '感谢反馈，工程师已跟进处理。' : ''
+    mockFeedbacks.push(f)
+  }
+}
+
+export function mockGetFeedbackList(pageNum: number, pageSize: number): Promise<FeedBackListBean> {
+  return new Promise<FeedBackListBean>((resolve) => {
+    if (mockFeedbacks.length === 0) {
+      initFeedbacks()
+    }
+    const bean: FeedBackListBean = new FeedBackListBean()
+    bean.code = 200
+    bean.total = mockFeedbacks.length
+    const start: number = (pageNum - 1) * pageSize
+    for (let i: number = start; i < start + pageSize && i < mockFeedbacks.length; i++) {
+      bean.rows.push(mockFeedbacks[i])
+    }
+    resolve(bean)
+  })
+}
+
+export function mockAddFeedback(content: string): Promise<IResult> {
+  return new Promise<IResult>((resolve) => {
+    if (mockFeedbacks.length === 0) {
+      initFeedbacks()
+    }
+    const f: Feedback = new Feedback()
+    f.id = (mockFeedbacks.length + 1).toString() + '-' + Date.now().toString()
+    f.userId = '1'
+    f.userName = 'yqh'
+    f.nickName = '杨庆鸿'
+    f.content = content
+    f.status = FEEDBACK_UNREAD
+    f.delFlag = DEL_NORMAL
+    f.createTime = '2026-10-28 12:00'
+    f.reply = ''
+    mockFeedbacks.unshift(f)
+    resolve({ code: 200, msg: 'mock 反馈提交成功' })
+  })
+}
+
+export function mockGetFeedbackDetail(id: string): Promise<Feedback> {
+  return new Promise<Feedback>((resolve) => {
+    for (let i: number = 0; i < mockFeedbacks.length; i++) {
+      if (mockFeedbacks[i].id === id) {
+        resolve(mockFeedbacks[i])
+        return
+      }
+    }
+    resolve(new Feedback())
+  })
+}
+
+export function mockDeleteFeedback(id: string): Promise<IResult> {
+  return new Promise<IResult>((resolve) => {
+    const next: Feedback[] = []
+    for (let i: number = 0; i < mockFeedbacks.length; i++) {
+      if (mockFeedbacks[i].id !== id) {
+        next.push(mockFeedbacks[i])
+      }
+    }
+    mockFeedbacks = next
+    resolve({ code: 200, msg: 'mock 删除成功' })
   })
 }
