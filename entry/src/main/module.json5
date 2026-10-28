@@ -4,14 +4,20 @@
     "type": "entry",
     "description": "$string:module_desc",
     "mainElement": "EntryAbility",
+    // 模拟器多为 phone 镜像；补 tablet 便于在平板镜像上也直接安装
     "deviceTypes": [
-      "phone"
+      "phone",
+      "tablet"
     ],
     "deliveryWithInstall": true,
     "installationFree": false,
     "requestPermissions": [
       {
         "name": "ohos.permission.INTERNET"
+      },
+      {
+        // normal 级，声明即用（不需弹窗授权），便于排查网络连通性
+        "name": "ohos.permission.GET_NETWORK_INFO"
       }
     ],
     "pages": "$profile:main_pages",
