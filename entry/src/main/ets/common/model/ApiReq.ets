@@ -29,6 +29,12 @@ export interface CarInfoReq {
   carId: string
 }
 
+// 车辆移动请求体（接口 4.8）
+export interface CarMoveReq {
+  carVin: string
+  direction: string
+}
+
 // 车辆状态变更请求体（接口 4.7）：接口形态同 CarStateChange，独立声明避免 UI 层反向依赖 model
 export interface CarStateChange {
   carVin: string

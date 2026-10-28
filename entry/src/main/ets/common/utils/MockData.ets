@@ -128,3 +128,10 @@ export function mockChangeCarState(req: CarStateChange): Promise<IResult> {
     resolve({ code: 200, msg: 'mock 状态更新成功' })
   })
 }
+
+// 车辆移动（接口 4.8）
+export function mockMoveCar(direction: string): Promise<IResult> {
+  return new Promise<IResult>((resolve) => {
+    resolve({ code: 200, msg: 'mock 移动指令已下发：' + direction })
+  })
+}

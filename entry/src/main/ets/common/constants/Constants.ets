@@ -34,5 +34,12 @@ export const VIN_MIN_LEN: number = 4
 export const VIN_MAX_LEN: number = 17
 export const BENCH_VIN: string = '4494356c' // 台架调试 VIN（个人 VIN 不可用于台架）
 
+// 车辆移动方向（接口 4.8）：按下移动、松开停车
+export const MOVE_FRONT: string = 'front'
+export const MOVE_BACK: string = 'back'
+export const MOVE_LEFT: string = 'left'
+export const MOVE_RIGHT: string = 'right'
+export const MOVE_STOP: string = 'stop'
+
 // 商城/车辆 mock
 export const MOCK_CAR_ID: string = '1'

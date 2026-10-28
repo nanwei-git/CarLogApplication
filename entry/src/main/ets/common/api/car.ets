@@ -4,9 +4,9 @@ import { ApiPath, USE_MOCK } from '../constants/HttpApi'
 import { IResult } from '../model/IResult'
 import { CarInfoBean, parseCarInfo } from '../model/CarInfoBean'
 import { CarStat, parseCarStat } from '../model/CarStateBean'
-import { CarInfoReq, CarStateChange } from '../model/ApiReq'
+import { CarInfoReq, CarStateChange, CarMoveReq } from '../model/ApiReq'
 import { getCarId, getCarVin } from '../utils/StorageUtils'
-import { mockGetCarInfo, mockGetCarState, mockChangeCarState } from '../utils/MockData'
+import { mockGetCarInfo, mockGetCarState, mockChangeCarState, mockMoveCar } from '../utils/MockData'
 
 // 4.5 车辆管理信息（名称/续航/电量/更新时间）
 export function getCarInfo(): Promise<CarInfoBean> {
@@ -35,4 +35,13 @@ export function changeCarState(change: CarStateChange): Promise<IResult> {
     return mockChangeCarState(change)
   }
   return post(ApiPath.carStateChange, change)
+}
+
+// 4.8 车辆移动：direction = front/back/left/right，stop 表示停车
+export function moveCar(direction: string): Promise<IResult> {
+  if (USE_MOCK) {
+    return mockMoveCar(direction)
+  }
+  const req: CarMoveReq = { carVin: getCarVin(), direction: direction }
+  return post(ApiPath.carMove, req)
 }

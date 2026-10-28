@@ -10,6 +10,7 @@ interface ApiPathMap {
   carInfo: string
   carState: string
   carStateChange: string
+  carMove: string
 }
 
 export const ApiPath: ApiPathMap = {
@@ -19,7 +20,8 @@ export const ApiPath: ApiPathMap = {
   bindCar: '/app/car/bind',
   carInfo: '/app/car/info',
   carState: '/app/car/state',
-  carStateChange: '/app/car/state/change'
+  carStateChange: '/app/car/state/change',
+  carMove: '/app/car/move'
 }
 
 // C2：默认 false 直连真服务器；置 true 走本地 mock（便于无后端验收 UI）

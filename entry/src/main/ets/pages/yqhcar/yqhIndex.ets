@@ -3,6 +3,7 @@
 import { COLORS, BG_GRADIENT } from '../../common/style/Style'
 import { YqhCarInfoComp } from './comps/yqhCarInfoComp'
 import { YqhAirConditionComp } from './comps/yqhAirConditionComp'
+import { YqhControl } from './yqhControl'
 
 @Entry
 @Component
@@ -40,11 +41,9 @@ struct YqhIndex {
         }.tabBar(this.tabBarBuilder('首页', 0))
 
         TabContent() {
-          Column() {
-            Text('车控（M6+ 门窗灯 / 移动）')
-              .fontColor(COLORS.ink)
+          Scroll() {
+            YqhControl()
           }
-          .justifyContent(FlexAlign.Center)
           .width('100%')
           .height('100%')
         }.tabBar(this.tabBarBuilder('车控', 1))
