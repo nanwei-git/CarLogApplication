@@ -32,8 +32,10 @@ export const ApiPath: ApiPathMap = {
   feedbackDelete: '/app/feedback/delete'
 }
 
-// C2：默认 false 直连真服务器；置 true 走本地 mock（便于无后端验收 UI）
-export const USE_MOCK: boolean = false
+// C2：false 直连真服务器；true 走本地 mock
+// 当前置 true：真服务器 /app/register 返回业务码 401（后端鉴权未放行），先在模拟器验收 UI；
+// 待后端放行 /app/** 后改回 false 即可直连
+export const USE_MOCK: boolean = true
 
 // 兼容既有 LoginPage 的常量
 export const LoginUrl: string = BaseUrl + ApiPath.login

@@ -16,14 +16,17 @@ export function post(path: string, body: Object): Promise<IResult> {
     let httpRequest = http.createHttp()
     const url: string = BaseUrl + path
     const start: number = Date.now()
+    const token: string = currentToken()
+    // 若依类后端要求 "Bearer <token>"，未登录时不带该请求头（避免空值触发鉴权失败）
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (token !== '') {
+      headers['Authorization'] = 'Bearer ' + token
+    }
     // 模拟器联调用：HiLog 过滤 "yqhHttp" 即可看到每次请求的方法/耗时/响应码/报文
     hilog.info(0x0001, 'yqhHttp', 'POST %{public}s body=%{public}s', url, JSON.stringify(body))
     httpRequest.request(url, {
       method: http.RequestMethod.POST,
-      header: {
-        'Content-Type': 'application/json',
-        'Authorization': currentToken()
-      },
+      header: headers,
       extraData: JSON.stringify(body)
     }, (err, data) => {
       httpRequest.destroy()
@@ -43,6 +46,10 @@ export function post(path: string, body: Object): Promise<IResult> {
       }
       if (data.responseCode === http.ResponseCode.OK) {
         const res = JSON.parse(data.result as string) as IResult
+        if (res.code === 401) {
+          // 业务码 401：后端鉴权未放行该路径（非 HTTP 401），记录原文便于排查
+          hilog.error(0x0001, 'yqhHttp', 'business 401 on %{public}s: %{public}s', url, res.msg)
+        }
         resolve(res)
       } else {
         reject(new Error('responseCode: ' + data.responseCode))
