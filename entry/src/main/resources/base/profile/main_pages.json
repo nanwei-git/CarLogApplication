@@ -1,0 +1,24 @@
+{
+  "src": [
+    "pages/yqhcar/yqhWelcome",
+    "pages/yqhcar/yqhLogin",
+    "pages/yqhcar/yqhIndex",
+    "pages/Index",
+    "pages/leson1/yqhworkPage",
+    "pages/leson2/Login",
+    "pages/leson3/LoginYqhEncapPage",
+    "pages/zuoye/SignupUI",
+    "pages/leson4/indexyqhPage",
+    "pages/leson5/MyLoginPage",
+    "pages/leson5/MyRegisterPage",
+    "pages/leson5/IndexPage",
+    "pages/leson5/MyProfilePage",
+    "pages/leson5/FontSizeSetting",
+    "pages/leson5/MyAboutPage",
+    "pages/leson5-new/yqhNavigationPage",
+    "pages/leson7-yangnawtabs/newtabsPage",
+    "pages/zuoye2/FeedbackTabPage",
+    "pages/Perferences/FonuSizePreferencesPage",
+    "pages/login/LoginPage"
+  ]
+}

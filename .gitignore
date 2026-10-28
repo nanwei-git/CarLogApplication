@@ -1,0 +1,25 @@
+# Build output
+build/
+.hvigor/
+**/build/
+**/.hvigor/
+
+# Dependencies
+oh_modules/
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+
+# Local config
+local.properties
+
+# Binaries / artifacts
+*.hap
+*.app
+*.dex
+*.class
+
+# Logs
+*.log
