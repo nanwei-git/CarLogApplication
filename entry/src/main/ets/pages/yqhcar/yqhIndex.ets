@@ -2,6 +2,7 @@
 // 列表→详情后续里程碑通过 navPathStack.pushPath 走 NavDestination（C5 已裁决）。
 import { COLORS, BG_GRADIENT } from '../../common/style/Style'
 import { YqhCarInfoComp } from './comps/yqhCarInfoComp'
+import { YqhAirConditionComp } from './comps/yqhAirConditionComp'
 
 @Entry
 @Component
@@ -30,10 +31,7 @@ struct YqhIndex {
           Scroll() {
             Column() {
               YqhCarInfoComp()
-              Text('智能空调（M5+）')
-                .fontSize(13)
-                .fontColor(COLORS.inkSub)
-                .padding({ left: 16, bottom: 16 })
+              YqhAirConditionComp()
             }
             .width('100%')
           }

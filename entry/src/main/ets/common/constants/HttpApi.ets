@@ -8,6 +8,8 @@ interface ApiPathMap {
   userInfo: string
   bindCar: string
   carInfo: string
+  carState: string
+  carStateChange: string
 }
 
 export const ApiPath: ApiPathMap = {
@@ -15,7 +17,9 @@ export const ApiPath: ApiPathMap = {
   register: '/app/register',
   userInfo: '/app/user/info',
   bindCar: '/app/car/bind',
-  carInfo: '/app/car/info'
+  carInfo: '/app/car/info',
+  carState: '/app/car/state',
+  carStateChange: '/app/car/state/change'
 }
 
 // C2：默认 false 直连真服务器；置 true 走本地 mock（便于无后端验收 UI）

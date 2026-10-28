@@ -3,9 +3,10 @@ import { post } from '../utils/RequestUtil'
 import { ApiPath, USE_MOCK } from '../constants/HttpApi'
 import { IResult } from '../model/IResult'
 import { CarInfoBean, parseCarInfo } from '../model/CarInfoBean'
-import { CarInfoReq } from '../model/ApiReq'
-import { getCarId } from '../utils/StorageUtils'
-import { mockGetCarInfo } from '../utils/MockData'
+import { CarStat, parseCarStat } from '../model/CarStateBean'
+import { CarInfoReq, CarStateChange } from '../model/ApiReq'
+import { getCarId, getCarVin } from '../utils/StorageUtils'
+import { mockGetCarInfo, mockGetCarState, mockChangeCarState } from '../utils/MockData'
 
 // 4.5 车辆管理信息（名称/续航/电量/更新时间）
 export function getCarInfo(): Promise<CarInfoBean> {
@@ -14,4 +15,24 @@ export function getCarInfo(): Promise<CarInfoBean> {
   }
   const req: CarInfoReq = { carId: getCarId() }
   return post(ApiPath.carInfo, req).then((res: IResult) => parseCarInfo(res.data as ESObject))
+}
+
+// 4.6 车辆状态（门/灯/空调/循环/除雾/温度）
+export function getCarState(): Promise<CarStat> {
+  if (USE_MOCK) {
+    return mockGetCarState()
+  }
+  const req: CarInfoReq = { carId: getCarId() }
+  return post(ApiPath.carState, req).then((res: IResult) => parseCarStat(res.data as ESObject))
+}
+
+// 4.7 变更车辆状态：只传变更字段，成功后由调用方重新 getCarState 回写刷新
+export function changeCarState(change: CarStateChange): Promise<IResult> {
+  if (change.carVin === '') {
+    change.carVin = getCarVin()
+  }
+  if (USE_MOCK) {
+    return mockChangeCarState(change)
+  }
+  return post(ApiPath.carStateChange, change)
 }

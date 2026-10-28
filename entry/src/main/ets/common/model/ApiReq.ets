@@ -28,3 +28,16 @@ export class EmptyReq {
 export interface CarInfoReq {
   carId: string
 }
+
+// 车辆状态变更请求体（接口 4.7）：接口形态同 CarStateChange，独立声明避免 UI 层反向依赖 model
+export interface CarStateChange {
+  carVin: string
+  acBtn?: string
+  circulate?: string
+  clearFog?: string
+  setTemp?: string
+  door?: string
+  light?: string
+  windLevel?: string
+  fanState?: string
+}
