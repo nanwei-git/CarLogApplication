@@ -2,7 +2,14 @@
 export const BaseUrl: string = 'http://121.36.14.143:10001'
 
 // 接口路径（login 与既有 LoginUrl 一致；其余按需求文档约定，待真服务器校核）
-export const ApiPath = {
+interface ApiPathMap {
+  login: string
+  register: string
+  userInfo: string
+  bindCar: string
+}
+
+export const ApiPath: ApiPathMap = {
   login: '/app/login',
   register: '/app/register',
   userInfo: '/app/user/info',

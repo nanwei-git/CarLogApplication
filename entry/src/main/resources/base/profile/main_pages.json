@@ -3,6 +3,7 @@
     "pages/yqhcar/yqhWelcome",
     "pages/yqhcar/yqhLogin",
     "pages/yqhcar/yqhRegister",
+    "pages/yqhcar/yqhBindCar",
     "pages/yqhcar/yqhIndex",
     "pages/Index",
     "pages/leson1/yqhworkPage",

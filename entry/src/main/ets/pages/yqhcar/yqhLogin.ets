@@ -49,7 +49,7 @@ struct YqhLogin {
               setCarVin(info.carVin)
               setCarId(info.carId)
               setAvatar(info.user.avatar)
-              if (info.carVin === '' || info.carVin === null) {
+              if (info.carVin === '') {
                 router.replaceUrl({ url: 'pages/yqhcar/yqhBindCar' })
               } else {
                 router.replaceUrl({ url: 'pages/yqhcar/yqhIndex' })
@@ -115,7 +115,6 @@ struct YqhLogin {
               })
           }
         }
-        .width('100%')
       }
       .width('100%')
       .height('100%')

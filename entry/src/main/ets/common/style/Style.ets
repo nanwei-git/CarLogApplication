@@ -1,7 +1,22 @@
 // 设计令牌（取自用户色卡：奶油黄 → 薄荷青，覆盖先前暗色玻璃风）
 // 全工程统一引用，保证主题一致。
 
-export const COLORS = {
+interface AppColors {
+  bg0: string
+  bg1: string
+  bg2: string
+  bg3: string
+  card: string
+  line: string
+  ink: string
+  inkSub: string
+  accent: string
+  accentDeep: string
+  highlight: string
+  danger: string
+}
+
+export const COLORS: AppColors = {
   bg0: '#FDF6DC', // 奶油黄（顶部）
   bg1: '#E9F5DA', // 浅黄绿
   bg2: '#C8F0E4', // 薄荷

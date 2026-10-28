@@ -1,7 +1,17 @@
 // 全局状态键 + 持久化（遵循既有 PersistentStorage 范式，KT10）
 // 底层即为"用户首选项"，满足课程 KT10 要求。
 
-export const StorageKeys = {
+interface StorageKeyMap {
+  isLogin: string
+  token: string
+  userId: string
+  userName: string
+  carVin: string
+  carId: string
+  avatar: string
+}
+
+export const StorageKeys: StorageKeyMap = {
   isLogin: 'isLogin',
   token: 'token',
   userId: 'userId',

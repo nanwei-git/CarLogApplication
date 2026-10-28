@@ -4,8 +4,9 @@ import { COLORS } from '../style/Style'
 
 @Component
 export struct YqhGlassCard {
-  @BuilderParam content: () => void = () => {}
   @Prop pad: number = 16
+  @Builder defaultContent() {}
+  @BuilderParam content: () => void = this.defaultContent
 
   build() {
     Column() {

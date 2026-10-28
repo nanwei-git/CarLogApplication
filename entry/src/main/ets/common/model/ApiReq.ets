@@ -19,3 +19,7 @@ export interface RegisterReq {
 export interface BindReq {
   carVin: string
 }
+
+// 无参请求体（如 /app/user/info），避免无类型对象字面量
+export class EmptyReq {
+}
