@@ -9,6 +9,8 @@ import { YqhFeedbackAdd } from './yqhFeedbackAdd'
 import { YqhFeedbackDetail } from './yqhFeedbackDetail'
 import { YqhMine } from './yqhMine'
 import { YqhSettings } from './yqhSettings'
+import { YqhMall } from './yqhMall'
+import { YqhMallDetail } from './yqhMallDetail'
 
 @Entry
 @Component
@@ -35,6 +37,16 @@ struct YqhIndex {
         YqhSettings()
       }
       .title('设置')
+    } else if (name === 'Mall') {
+      NavDestination() {
+        YqhMall()
+      }
+      .title('车主商城')
+    } else if (name === 'MallDetail') {
+      NavDestination() {
+        YqhMallDetail({ productId: param as string })
+      }
+      .title('商品详情')
     }
   }
 

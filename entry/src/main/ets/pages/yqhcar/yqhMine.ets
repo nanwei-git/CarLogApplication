@@ -121,6 +121,28 @@ export struct YqhMine {
               .onClick(() => {
                 this.navPathStack.pushPath({ name: 'Settings' })
               })
+
+              Row() {
+                Column({ space: 2 }) {
+                  Text('车主商城')
+                    .fontSize(14 * this.fontScale)
+                    .fontColor(palette(this.dark).ink)
+                  Text('商品 · 优惠 · 收藏 · 评价')
+                    .fontSize(11 * this.fontScale)
+                    .fontColor(palette(this.dark).inkSub)
+                }
+                .alignItems(HorizontalAlign.Start)
+                .layoutWeight(1)
+                Text('›')
+                  .fontSize(20)
+                  .fontColor(palette(this.dark).inkSub)
+              }
+              .width('100%')
+              .height(52)
+              .padding({ left: 12, right: 12 })
+              .onClick(() => {
+                this.navPathStack.pushPath({ name: 'Mall' })
+              })
             }
           }
 

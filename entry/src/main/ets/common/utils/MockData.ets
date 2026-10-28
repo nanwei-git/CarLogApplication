@@ -6,6 +6,7 @@ import { CarInfoBean } from '../model/CarInfoBean'
 import { CarStat } from '../model/CarStateBean'
 import { CarStateChange } from '../model/ApiReq'
 import { Feedback, FeedBackListBean } from '../model/FeedBackBean'
+import { MallProduct, Review } from '../model/MallBean'
 import {
   SWITCH_ON,
   SWITCH_OFF,
@@ -223,5 +224,116 @@ export function mockDeleteFeedback(id: string): Promise<IResult> {
     }
     mockFeedbacks = next
     resolve({ code: 200, msg: 'mock 删除成功' })
+  })
+}
+
+// ========== 车主商城（自定义功能 C4）==========
+let mockMalls: MallProduct[] = []
+
+function addReview(p: MallProduct, user: string, rating: number, content: string, time: string): void {
+  const r: Review = new Review()
+  r.user = user
+  r.rating = rating
+  r.content = content
+  r.time = time
+  p.reviews.push(r)
+}
+
+function initMalls(): void {
+  mockMalls = []
+  const p1: MallProduct = new MallProduct()
+  p1.id = '1'
+  p1.name = '车载智能香薰（薄荷青）'
+  p1.price = 129
+  p1.originalPrice = 169
+  p1.discount = '满 199 减 30'
+  p1.desc = '专属香型，适配出风口，续航 60 天，随车启停。'
+  p1.sales = 862
+  p1.tag = '车主专享'
+  addReview(p1, '车友_小李', 5, '味道清爽不刺鼻，装上去很搭内饰。', '2026-10-02')
+  addReview(p1, '车友_阿May', 4, '香味持久，就是替换芯略贵。', '2026-10-11')
+  mockMalls.push(p1)
+
+  const p2: MallProduct = new MallProduct()
+  p2.id = '2'
+  p2.name = 'TPE 全包围脚垫'
+  p2.price = 299
+  p2.originalPrice = 399
+  p2.discount = '限时 7.5 折'
+  p2.desc = '环保无异味，专车定制版型，易清洗不积水。'
+  p2.sales = 1240
+  p2.tag = '热卖'
+  addReview(p2, '车友_老王', 5, '版型贴合，边缘不翘，值得。', '2026-09-28')
+  mockMalls.push(p2)
+
+  const p3: MallProduct = new MallProduct()
+  p3.id = '3'
+  p3.name = '车载无线充电支架'
+  p3.price = 89
+  p3.originalPrice = 119
+  p3.discount = '新人立减 10'
+  p3.desc = '15W 快充，重力联动夹紧，单手取放。'
+  p3.sales = 2033
+  p3.tag = '爆款'
+  addReview(p3, '车友_阿俊', 4, '充电稳定，夏天略微发热。', '2026-10-05')
+  addReview(p3, '车友_娜娜', 5, '导航时充电很方便，不挡视线。', '2026-10-19')
+  mockMalls.push(p3)
+
+  const p4: MallProduct = new MallProduct()
+  p4.id = '4'
+  p4.name = '后备箱收纳箱（折叠）'
+  p4.price = 69
+  p4.originalPrice = 99
+  p4.discount = '两件 8 折'
+  p4.desc = '40L 大容量，防滑底部，不用时可折叠收纳。'
+  p4.sales = 517
+  p4.tag = '实用'
+  addReview(p4, '车友_大刘', 4, '容量够大，折叠后不占地方。', '2026-10-08')
+  mockMalls.push(p4)
+
+  const p5: MallProduct = new MallProduct()
+  p5.id = '5'
+  p5.name = '高清行车记录仪'
+  p5.price = 459
+  p5.originalPrice = 599
+  p5.discount = '晒单返 30'
+  p5.desc = '2K 夜视，停车监控，手机直连查看。'
+  p5.sales = 326
+  p5.tag = '安全'
+  addReview(p5, '车友_陈师傅', 5, '夜视清晰，安装也简单。', '2026-10-15')
+  mockMalls.push(p5)
+
+  const p6: MallProduct = new MallProduct()
+  p6.id = '6'
+  p6.name = '车窗遮阳伞（前挡）'
+  p6.price = 49
+  p6.originalPrice = 79
+  p6.discount = '夏季特惠'
+  p6.desc = '钛银涂层隔热，一秒开合，收纳袋随车携带。'
+  p6.sales = 1580
+  p6.tag = '夏季必买'
+  addReview(p6, '车友_小林', 4, '隔热效果明显，就是撑开要练练。', '2026-10-21')
+  mockMalls.push(p6)
+}
+
+export function mockGetMallList(): Promise<MallProduct[]> {
+  return new Promise<MallProduct[]>((resolve) => {
+    if (mockMalls.length === 0) {
+      initMalls()
+    }
+    resolve(mockMalls)
+  })
+}
+
+export function mockToggleFav(id: string): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    for (let i: number = 0; i < mockMalls.length; i++) {
+      if (mockMalls[i].id === id) {
+        mockMalls[i].fav = !mockMalls[i].fav
+        resolve(mockMalls[i].fav)
+        return
+      }
+    }
+    resolve(false)
   })
 }
