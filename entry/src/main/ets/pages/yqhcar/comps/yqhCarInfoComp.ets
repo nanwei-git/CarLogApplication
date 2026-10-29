@@ -106,18 +106,14 @@ export struct YqhCarInfoComp {
       } else {
         YqhGlassCard({ pad: 20 }) {
           Column({ space: 12 }) {
-            // 车辆图（小米SU7 占位）：把 su7.png 放进 entry/src/main/resources/base/media/ 后，
-            // 将此 Row 替换为 Image($r('app.media.su7')).width('100%').height(120).objectFit(Cover)
-            Row() {
-              Text('🚗')
-                .fontSize(44)
-            }
-            .width('100%')
-            .height(120)
-            .borderRadius(16)
-            .backgroundColor('rgba(255,255,255,0.6)')
-            .justifyContent(FlexAlign.Center)
-            .margin({ bottom: 4 })
+            // 车辆图：小米 SU7（数据来源：Wikimedia Commons，文件 "Xiaomi SU7 004.jpg"，
+            // 作者 Wikisympathisant，许可证 CC BY-SA 4.0，链接见下方引用）
+            Image($r('app.media.su7'))
+              .width('100%')
+              .height(140)
+              .objectFit(ImageFit.Cover)
+              .borderRadius(16)
+              .margin({ bottom: 4 })
 
             Text(this.info.carName === '' ? '未绑定车辆' : this.info.carName)
               .fontSize(20)
