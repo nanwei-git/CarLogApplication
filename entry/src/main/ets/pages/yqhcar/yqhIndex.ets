@@ -11,6 +11,7 @@ import { YqhMine } from './yqhMine'
 import { YqhSettings } from './yqhSettings'
 import { YqhMall } from './yqhMall'
 import { YqhMallDetail } from './yqhMallDetail'
+import { YqhLog } from './yqhLog'
 
 @Entry
 @Component
@@ -47,6 +48,11 @@ struct YqhIndex {
         YqhMallDetail({ productId: param as string })
       }
       .title('商品详情')
+    } else if (name === 'Log') {
+      NavDestination() {
+        YqhLog()
+      }
+      .title('信息')
     }
   }
 
@@ -65,6 +71,28 @@ struct YqhIndex {
         TabContent() {
           Scroll() {
             Column() {
+              Row() {
+                Text('我的爱车')
+                  .fontSize(20)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(COLORS.ink)
+                Blank()
+                Row() {
+                  Text('📋')
+                    .fontSize(18)
+                    .fontColor(COLORS.ink)
+                }
+                .width(36)
+                .height(36)
+                .borderRadius(18)
+                .backgroundColor('rgba(255,255,255,0.7)')
+                .justifyContent(FlexAlign.Center)
+                .onClick(() => {
+                  this.navPathStack.pushPath({ name: 'Log' })
+                })
+              }
+              .width('100%')
+              .padding({ left: 4, right: 4 })
               YqhCarInfoComp()
               YqhAirConditionComp()
             }

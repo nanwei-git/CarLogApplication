@@ -4,9 +4,10 @@ import { ApiPath, USE_MOCK } from '../constants/HttpApi'
 import { IResult } from '../model/IResult'
 import { CarInfoBean, parseCarInfo } from '../model/CarInfoBean'
 import { CarStat, parseCarStat } from '../model/CarStateBean'
+import { OperationLog, parseCarLogs } from '../model/CarLogBean'
 import { CarInfoReq, CarStateChange, CarMoveReq } from '../model/ApiReq'
 import { getCarId, getCarVin } from '../utils/StorageUtils'
-import { mockGetCarInfo, mockGetCarState, mockChangeCarState, mockMoveCar } from '../utils/MockData'
+import { mockGetCarInfo, mockGetCarState, mockChangeCarState, mockMoveCar, mockGetCarLogs } from '../utils/MockData'
 
 // 4.5 车辆管理信息（名称/续航/电量/更新时间）
 export function getCarInfo(): Promise<CarInfoBean> {
@@ -44,4 +45,9 @@ export function moveCar(direction: string): Promise<IResult> {
   }
   const req: CarMoveReq = { carVin: getCarVin(), direction: direction }
   return post(ApiPath.carMove, req)
+}
+
+// 车辆操作日志（首页「信息」页）：目前本地生成（SPEC 无对应接口，预留解析与请求位）
+export function getCarLogs(): Promise<OperationLog[]> {
+  return mockGetCarLogs()
 }

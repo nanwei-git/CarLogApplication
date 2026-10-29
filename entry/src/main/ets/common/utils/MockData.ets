@@ -5,6 +5,7 @@ import { RegisterReq } from '../model/ApiReq'
 import { CarInfoBean } from '../model/CarInfoBean'
 import { CarStat } from '../model/CarStateBean'
 import { CarStateChange } from '../model/ApiReq'
+import { OperationLog } from '../model/CarLogBean'
 import { Feedback, FeedBackListBean } from '../model/FeedBackBean'
 import { MallProduct, Review } from '../model/MallBean'
 import {
@@ -143,6 +144,30 @@ export function mockChangeCarState(req: CarStateChange): Promise<IResult> {
 export function mockMoveCar(direction: string): Promise<IResult> {
   return new Promise<IResult>((resolve) => {
     resolve({ code: 200, msg: 'mock 移动指令已下发：' + direction })
+  })
+}
+
+// 车辆操作日志（首页「信息」页）：以 SU7 视角预置若干条本地记录
+export function mockGetCarLogs(): Promise<OperationLog[]> {
+  return new Promise<OperationLog[]>((resolve) => {
+    const logs: OperationLog[] = []
+    const add = (id: string, title: string, desc: string, time: string): void => {
+      const log: OperationLog = new OperationLog()
+      log.id = id
+      log.title = title
+      log.desc = desc
+      log.time = time
+      logs.push(log)
+    }
+    add('8', '车辆启动', '完成系统自检，电量 78%', '2026-10-28 08:12')
+    add('7', '车门上锁', '四门及尾门已上锁', '2026-10-28 08:11')
+    add('6', '近光灯开启', '夜间模式已开启', '2026-10-27 19:40')
+    add('5', '空调启动', '设定温度 26℃，制冷模式', '2026-10-27 19:38')
+    add('4', '车辆前移', '低速前进约 2.3 m', '2026-10-27 18:05')
+    add('3', '绑定车辆', '已绑定 VIN 00661718330', '2026-10-26 21:30')
+    add('2', '空调关闭', '空调系统已关闭', '2026-10-26 12:10')
+    add('1', '车辆移动', '向右微调车位', '2026-10-25 17:22')
+    resolve(logs)
   })
 }
 
