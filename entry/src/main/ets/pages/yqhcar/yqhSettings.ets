@@ -82,6 +82,24 @@ export struct YqhSettings {
             }
           }
 
+          YqhGlassCard({ pad: 16 }) {
+            Column({ space: 6 }) {
+              Text('关于 / 素材来源')
+                .fontSize(14 * this.fontScale)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(palette(this.dark).ink)
+                .width('100%')
+              Text('车辆图：小米 SU7，来源 Wikimedia Commons（作者 Wikisympathisant，CC BY-SA 4.0）')
+                .fontSize(11 * this.fontScale)
+                .fontColor(palette(this.dark).inkSub)
+                .width('100%')
+              Text('控制图标：方向键 Octicons（MIT）；锁 Open Clipart（公有领域）；灯泡 Simple Icons（CC0）')
+                .fontSize(11 * this.fontScale)
+                .fontColor(palette(this.dark).inkSub)
+                .width('100%')
+            }
+          }
+
           YqhButton({
             text: '返回',
             primary: false,

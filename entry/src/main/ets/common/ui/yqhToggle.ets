@@ -6,11 +6,19 @@ import { COLORS } from '../style/Style'
 export struct YqhToggle {
   @Prop label: string = ''
   @Prop sub: string = '' // 副标题（状态说明），可空
+  @Prop icon: ResourceStr = '' // 可选前置图标（资源名，如 $r('app.media.lock')）
   @Prop checked: boolean = false
   onToggleChange: (v: boolean) => void = (v: boolean) => {}
 
   build() {
     Row() {
+      if (this.icon !== '') {
+        Image(this.icon)
+          .width(22)
+          .height(22)
+          .margin({ right: 10 })
+          .fillColor(COLORS.ink)
+      }
       Column({ space: 2 }) {
         Text(this.label)
           .fontSize(14)

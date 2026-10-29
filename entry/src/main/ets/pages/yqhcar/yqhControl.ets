@@ -89,23 +89,32 @@ export struct YqhControl {
       })
   }
 
-  // 方向键：按住 Down 下发移动，松开 Up/Cancel 下发停车
+  // 方向键：按住 Down 下发移动，松开 Up/Cancel 下发停车；箭头用在线 SVG 图标（见设置/关于）
   @Builder
-  dirBtn(text: string, direction: string, label: string) {
-    Button(text)
-      .width(64)
-      .height(64)
-      .borderRadius(32)
-      .fontSize(24)
-      .backgroundColor(direction === MOVE_STOP ? COLORS.highlight : COLORS.card)
-      .fontColor(COLORS.accentDeep)
-      .onTouch((e: TouchEvent) => {
-        if (e.type === TouchType.Down) {
-          this.doMove(direction, label)
-        } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
-          this.doMove(MOVE_STOP, '停')
-        }
-      })
+  dirBtn(icon: ResourceStr, direction: string, label: string) {
+    Button({ type: ButtonType.Circle }) {
+      if (direction === MOVE_STOP) {
+        Text('停')
+          .fontSize(20)
+          .fontColor(COLORS.accentDeep)
+      } else {
+        Image(icon)
+          .width(26)
+          .height(26)
+          .fillColor(COLORS.accentDeep)
+      }
+    }
+    .width(64)
+    .height(64)
+    .borderRadius(32)
+    .backgroundColor(direction === MOVE_STOP ? COLORS.highlight : COLORS.card)
+    .onTouch((e: TouchEvent) => {
+      if (e.type === TouchType.Down) {
+        this.doMove(direction, label)
+      } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
+        this.doMove(MOVE_STOP, '停')
+      }
+    })
   }
 
   build() {
@@ -127,6 +136,7 @@ export struct YqhControl {
               .fontColor(COLORS.ink)
             YqhToggle({
               label: '车门',
+              icon: $r('app.media.lock'),
               sub: this.isOn(this.stat.door) ? '已开启' : '已关闭',
               checked: this.isOn(this.stat.door),
               onToggleChange: (v: boolean) => {
@@ -135,6 +145,7 @@ export struct YqhControl {
             })
             YqhToggle({
               label: '车灯',
+              icon: $r('app.media.bulb'),
               sub: this.isOn(this.stat.light) ? '已开启' : '已关闭',
               checked: this.isOn(this.stat.light),
               onToggleChange: (v: boolean) => {
@@ -153,15 +164,15 @@ export struct YqhControl {
             // 十字方向键
             Column({ space: 10 }) {
               Row() {
-                this.dirBtn('↑', MOVE_FRONT, '前')
+                this.dirBtn($r('app.media.arrow_up'), MOVE_FRONT, '前')
               }
               Row({ space: 10 }) {
-                this.dirBtn('←', MOVE_LEFT, '左')
-                this.dirBtn('停', MOVE_STOP, '停')
-                this.dirBtn('→', MOVE_RIGHT, '右')
+                this.dirBtn($r('app.media.arrow_left'), MOVE_LEFT, '左')
+                this.dirBtn('' as ResourceStr, MOVE_STOP, '停')
+                this.dirBtn($r('app.media.arrow_right'), MOVE_RIGHT, '右')
               }
               Row() {
-                this.dirBtn('↓', MOVE_BACK, '后')
+                this.dirBtn($r('app.media.arrow_down'), MOVE_BACK, '后')
               }
             }
             .width('100%')
