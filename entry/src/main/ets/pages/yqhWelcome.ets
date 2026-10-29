@@ -1,8 +1,6 @@
-// 欢迎页（M1）：色卡浅色渐变背景，3s 后按是否已登录自动跳登录页或首页。
+// 欢迎页（M1）：纯黑底 + bg_start 发光车 + 一行标语；3s 后按登录态分流。
 import { router } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../common/style/Style'
 import { getIsLogin } from '../common/utils/StorageUtils'
-import { YqhGlassCard } from '../views/yqhGlassCard'
 
 @Entry
 @Component
@@ -29,38 +27,26 @@ struct YqhWelcome {
 
   build() {
     Stack() {
+      // 发光车底图（纯黑背景承托）
+      Image($r('app.media.bg_start'))
+        .width('100%')
+        .height('100%')
+        .objectFit(ImageFit.Cover)
+      // 底部标语
       Column() {
-        YqhGlassCard({ pad: 28 }) {
-          Column({ space: 18 }) {
-            // 字母圆形头像占位（零美术资产，替代图片头像）
-            Stack() {
-              Circle({ width: 96, height: 96 })
-                .fill(COLORS.card)
-                .stroke(COLORS.line)
-                .strokeWidth(1)
-              Text('杨')
-                .fontSize(40)
-                .fontWeight(FontWeight.Bold)
-                .fontColor(COLORS.accentDeep)
-            }
-            Text('杨庆鸿的车主App')
-              .fontSize(26)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(COLORS.ink)
-            Text('智慧出行 · 远程控车')
-              .fontSize(15)
-              .fontColor(COLORS.inkSub)
-          }
-          .justifyContent(FlexAlign.Center)
-        }
+        Text('轻松驾驭·快乐出行')
+          .fontSize(20)
+          .fontWeight(FontWeight.Medium)
+          .fontColor('#FFFFFF')
+          .shadow({ radius: 6, color: '#000000', offsetX: 0, offsetY: 1 })
       }
       .width('100%')
       .height('100%')
-      .padding(24)
-      .justifyContent(FlexAlign.Center)
+      .justifyContent(FlexAlign.End)
+      .padding({ bottom: 90 })
     }
     .width('100%')
     .height('100%')
-    .linearGradient(BG_GRADIENT)
+    .backgroundColor('#000000')
   }
 }
