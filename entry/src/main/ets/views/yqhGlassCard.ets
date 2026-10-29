@@ -14,8 +14,8 @@ export struct YqhGlassCard {
     }
     .width('100%')
     .backgroundColor(COLORS.card)
-    .borderRadius(18)
-    .border({ width: 1, color: COLORS.line })
+    .borderRadius(16)
+    .shadow({ radius: 10, color: 'rgba(31,35,41,0.08)', offsetX: 0, offsetY: 3 })
     .padding(this.pad)
   }
 }

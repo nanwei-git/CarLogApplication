@@ -108,7 +108,7 @@ struct YqhIndex {
           }
           .width('100%')
           .height('100%')
-        }.tabBar(this.tabBarBuilder('车控', 1))
+        }.tabBar(this.tabBarBuilder('车辆控制', 1))
 
         TabContent() {
           YqhFeedback()
