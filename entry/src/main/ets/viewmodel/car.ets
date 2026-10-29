@@ -1,13 +1,13 @@
 // 车辆接口函数（4.5 车辆信息 / 4.6 车辆状态 / 4.7 状态变更 / 4.8 移动）
-import { post } from '../utils/RequestUtil'
-import { ApiPath, USE_MOCK } from '../constants/HttpApi'
+import { post } from '../common/utils/RequestUtil'
+import { ApiPath, USE_MOCK } from '../common/constants/HttpApi'
 import { IResult } from '../model/IResult'
 import { CarInfoBean, parseCarInfo } from '../model/CarInfoBean'
 import { CarStat, parseCarStat } from '../model/CarStateBean'
 import { OperationLog, parseCarLogs } from '../model/CarLogBean'
 import { CarInfoReq, CarStateChange, CarMoveReq } from '../model/ApiReq'
-import { getCarId, getCarVin } from '../utils/StorageUtils'
-import { mockGetCarInfo, mockGetCarState, mockChangeCarState, mockMoveCar, mockGetCarLogs } from '../utils/MockData'
+import { getCarId, getCarVin } from '../common/utils/StorageUtils'
+import { mockGetCarInfo, mockGetCarState, mockChangeCarState, mockMoveCar, mockGetCarLogs } from '../common/utils/MockData'
 
 // 4.5 车辆管理信息（名称/续航/电量/更新时间）
 export function getCarInfo(): Promise<CarInfoBean> {

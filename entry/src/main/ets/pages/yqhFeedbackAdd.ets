@@ -1,11 +1,11 @@
 // 新增反馈（M7，接口 4.9.2）：≤100 字校验，提交成功后置脏标记并回列表
 import { promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { YqhButton } from '../../common/ui/yqhButton'
-import { addFeedback } from '../../common/api/feedback'
-import { IResult } from '../../common/model/IResult'
-import { FEEDBACK_MAX, TOAST_MS } from '../../common/constants/Constants'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { YqhButton } from '../views/yqhButton'
+import { addFeedback } from '../viewmodel/feedback'
+import { IResult } from '../model/IResult'
+import { FEEDBACK_MAX, TOAST_MS } from '../common/constants/Constants'
 
 @Component
 export struct YqhFeedbackAdd {

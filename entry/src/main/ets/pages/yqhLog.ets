@@ -1,10 +1,10 @@
 // 车辆操作日志「信息」页（原型同名页，UI 沿用本项目玻璃拟态风格）
 import { promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { getCarLogs } from '../../common/api/car'
-import { OperationLog } from '../../common/model/CarLogBean'
-import { TOAST_MS } from '../../common/constants/Constants'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { getCarLogs } from '../viewmodel/car'
+import { OperationLog } from '../model/CarLogBean'
+import { TOAST_MS } from '../common/constants/Constants'
 
 @Component
 export struct YqhLog {

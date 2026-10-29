@@ -1,6 +1,6 @@
 // 通用 UI 组件（封存复用）：带标题的开关行，薄荷主色
 // 用法：YqhToggle({ label: '空调', checked: true, onToggleChange: (v) => {...} })
-import { COLORS } from '../style/Style'
+import { COLORS } from '../common/style/Style'
 
 @Component
 export struct YqhToggle {

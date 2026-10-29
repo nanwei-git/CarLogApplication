@@ -1,8 +1,8 @@
 // 首页枢纽（M1 骨架）：根 Navigation + NavPathStack + 底部 Tabs（首页/车控/反馈/我的）
 // 列表→详情后续里程碑通过 navPathStack.pushPath 走 NavDestination（C5 已裁决）。
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhCarInfoComp } from './comps/yqhCarInfoComp'
-import { YqhAirConditionComp } from './comps/yqhAirConditionComp'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhCarInfoComp } from '../views/comps/yqhCarInfoComp'
+import { YqhAirConditionComp } from '../views/comps/yqhAirConditionComp'
 import { YqhControl } from './yqhControl'
 import { YqhFeedback } from './yqhFeedback'
 import { YqhFeedbackAdd } from './yqhFeedbackAdd'

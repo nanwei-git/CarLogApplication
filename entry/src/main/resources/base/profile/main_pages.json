@@ -1,10 +1,10 @@
 {
   "src": [
-    "pages/yqhcar/yqhWelcome",
-    "pages/yqhcar/yqhLogin",
-    "pages/yqhcar/yqhRegister",
-    "pages/yqhcar/yqhBindCar",
-    "pages/yqhcar/yqhIndex",
+    "pages/yqhWelcome",
+    "pages/yqhLogin",
+    "pages/yqhRegister",
+    "pages/yqhBindCar",
+    "pages/yqhIndex",
     "pages/Index",
     "pages/leson1/yqhworkPage",
     "pages/leson2/Login",

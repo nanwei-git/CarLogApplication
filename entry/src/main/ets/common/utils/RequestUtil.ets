@@ -4,7 +4,7 @@ import { router, promptAction } from '@kit.ArkUI'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 import { BaseUrl } from '../constants/HttpApi'
 import { clearSession } from './StorageUtils'
-import { IResult } from '../model/IResult'
+import { IResult } from '../../model/IResult'
 
 function currentToken(): string {
   return (AppStorage.get('token') as string) ?? ''
@@ -40,7 +40,7 @@ export function post(path: string, body: Object): Promise<IResult> {
       if (data.responseCode === 401) {
         clearSession()
         promptAction.showToast({ message: '登录已过期，请重新登录', duration: 2000 })
-        router.replaceUrl({ url: 'pages/yqhcar/yqhLogin' })
+        router.replaceUrl({ url: 'pages/yqhLogin' })
         reject(new Error('401'))
         return
       }

@@ -1,8 +1,8 @@
 // 车主商城列表（M8b，自定义功能 C4）：优惠提醒 + 商品卡 + 收藏切换
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { getMallList, toggleFav } from '../../common/api/mall'
-import { MallProduct } from '../../common/model/MallBean'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { getMallList, toggleFav } from '../viewmodel/mall'
+import { MallProduct } from '../model/MallBean'
 
 @Component
 export struct YqhMall {

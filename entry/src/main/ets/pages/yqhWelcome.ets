@@ -1,8 +1,8 @@
 // 欢迎页（M1）：色卡浅色渐变背景，3s 后按是否已登录自动跳登录页或首页。
 import { router } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { getIsLogin } from '../../common/utils/StorageUtils'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { getIsLogin } from '../common/utils/StorageUtils'
+import { YqhGlassCard } from '../views/yqhGlassCard'
 
 @Entry
 @Component
@@ -13,9 +13,9 @@ struct YqhWelcome {
     // 3s 后按登录态分流（与实验指导书"欢迎页自动跳转"流程一致）
     this.timer = setTimeout(() => {
       if (getIsLogin()) {
-        router.replaceUrl({ url: 'pages/yqhcar/yqhIndex' })
+        router.replaceUrl({ url: 'pages/yqhIndex' })
       } else {
-        router.replaceUrl({ url: 'pages/yqhcar/yqhLogin' })
+        router.replaceUrl({ url: 'pages/yqhLogin' })
       }
     }, 3000)
   }

@@ -1,10 +1,10 @@
 // 我的（M8a）：个人信息 / 换绑车辆 / 设置 / 退出登录（清状态）
 // 读取 StorageUtils 持久化的 userName / carVin / fontScale / darkMode（KT10）
 import { router, promptAction } from '@kit.ArkUI'
-import { palette, bgGradient } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { YqhButton } from '../../common/ui/yqhButton'
-import { clearSession } from '../../common/utils/StorageUtils'
+import { palette, bgGradient } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { YqhButton } from '../views/yqhButton'
+import { clearSession } from '../common/utils/StorageUtils'
 
 @Component
 export struct YqhMine {
@@ -39,7 +39,7 @@ export struct YqhMine {
         fontColor: palette(this.dark).danger,
         action: () => {
           clearSession()
-          router.replaceUrl({ url: 'pages/yqhcar/yqhLogin' })
+          router.replaceUrl({ url: 'pages/yqhLogin' })
         }
       }
     })
@@ -97,7 +97,7 @@ export struct YqhMine {
               .height(52)
               .padding({ left: 12, right: 12 })
               .onClick(() => {
-                router.pushUrl({ url: 'pages/yqhcar/yqhBindCar', params: { from: 'mine' } })
+                router.pushUrl({ url: 'pages/yqhBindCar', params: { from: 'mine' } })
               })
 
               Row() {

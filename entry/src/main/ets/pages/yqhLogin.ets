@@ -1,8 +1,8 @@
 // 登录页（M2）：账号密码 → getLogin 存 token → getUserInfo 判 carVin → 绑车或首页；401 处理
 import { router, promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { getLogin, getUserInfo } from '../../common/api/auth'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { getLogin, getUserInfo } from '../viewmodel/auth'
 import {
   setIsLogin,
   setToken,
@@ -11,9 +11,9 @@ import {
   setCarVin,
   setCarId,
   setAvatar
-} from '../../common/utils/StorageUtils'
-import { IResult } from '../../common/model/IResult'
-import { UserInfoBean } from '../../common/model/UserInfoBean'
+} from '../common/utils/StorageUtils'
+import { IResult } from '../model/IResult'
+import { UserInfoBean } from '../model/UserInfoBean'
 
 @Entry
 @Component
@@ -50,14 +50,14 @@ struct YqhLogin {
               setCarId(info.carId)
               setAvatar(info.user.avatar)
               if (info.carVin === '') {
-                router.replaceUrl({ url: 'pages/yqhcar/yqhBindCar' })
+                router.replaceUrl({ url: 'pages/yqhBindCar' })
               } else {
-                router.replaceUrl({ url: 'pages/yqhcar/yqhIndex' })
+                router.replaceUrl({ url: 'pages/yqhIndex' })
               }
             })
             .catch(() => {
               // 取用户信息失败：稳妥起见进首页
-              router.replaceUrl({ url: 'pages/yqhcar/yqhIndex' })
+              router.replaceUrl({ url: 'pages/yqhIndex' })
             })
         } else if (res.code === 401) {
           promptAction.showToast({ message: '用户名或密码错误', duration: 2000 })
@@ -111,7 +111,7 @@ struct YqhLogin {
               .backgroundColor(COLORS.card)
               .fontColor(COLORS.ink)
               .onClick(() => {
-                router.pushUrl({ url: 'pages/yqhcar/yqhRegister' })
+                router.pushUrl({ url: 'pages/yqhRegister' })
               })
           }
         }

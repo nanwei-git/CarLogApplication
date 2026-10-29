@@ -1,9 +1,9 @@
 // 设置（M8a，KT10）：字号三档 + 深色主题，全部走 PersistentStorage 持久化
-import { palette, bgGradient } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { YqhButton } from '../../common/ui/yqhButton'
-import { setFontScale, setDarkMode } from '../../common/utils/StorageUtils'
-import { FONT_SMALL, FONT_NORMAL, FONT_LARGE } from '../../common/constants/Constants'
+import { palette, bgGradient } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { YqhButton } from '../views/yqhButton'
+import { setFontScale, setDarkMode } from '../common/utils/StorageUtils'
+import { FONT_SMALL, FONT_NORMAL, FONT_LARGE } from '../common/constants/Constants'
 
 @Component
 export struct YqhSettings {

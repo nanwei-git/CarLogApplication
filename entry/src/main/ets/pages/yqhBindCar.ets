@@ -1,13 +1,13 @@
 // 绑车/换绑页（M3）：VIN 格式校验 → bindCarByVin → 存 carVin → 回首页（C3：carVin 单判）
 // 入口①：登录后无 carVin 强制进此页；入口②：我的页"换绑车辆"（from=mine，绑定后 back）
 import { router, promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { YqhButton } from '../../common/ui/yqhButton'
-import { bindCarByVin } from '../../common/api/auth'
-import { setCarVin, getCarVin, clearSession } from '../../common/utils/StorageUtils'
-import { IResult } from '../../common/model/IResult'
-import { VIN_PATTERN, VIN_MIN_LEN, VIN_MAX_LEN, TOAST_MS } from '../../common/constants/Constants'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { YqhButton } from '../views/yqhButton'
+import { bindCarByVin } from '../viewmodel/auth'
+import { setCarVin, getCarVin, clearSession } from '../common/utils/StorageUtils'
+import { IResult } from '../model/IResult'
+import { VIN_PATTERN, VIN_MIN_LEN, VIN_MAX_LEN, TOAST_MS } from '../common/constants/Constants'
 
 @Entry
 @Component
@@ -59,7 +59,7 @@ struct YqhBindCar {
           if (this.fromMine) {
             router.back()
           } else {
-            router.replaceUrl({ url: 'pages/yqhcar/yqhIndex' })
+            router.replaceUrl({ url: 'pages/yqhIndex' })
           }
         } else {
           // 账号过期/服务器错误：直接提示服务器返回信息
@@ -104,7 +104,7 @@ struct YqhBindCar {
               primary: false,
               onBtnClick: () => {
                 clearSession()
-                router.replaceUrl({ url: 'pages/yqhcar/yqhLogin' })
+                router.replaceUrl({ url: 'pages/yqhLogin' })
               }
             })
           }

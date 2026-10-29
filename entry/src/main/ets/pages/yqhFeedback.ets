@@ -1,13 +1,13 @@
 // 反馈列表（M7，接口 4.9.1/4.9.4）：下拉刷新 + 上拉加载 + 左滑删除（二次确认）
 // 由 yqhIndex 的"反馈" TabContent 组装；列表→详情走 NavDestination（C5）
 import { promptAction } from '@kit.ArkUI'
-import { COLORS } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { YqhButton } from '../../common/ui/yqhButton'
-import { getFeedbackList, deleteFeedback } from '../../common/api/feedback'
-import { Feedback, FeedBackListBean } from '../../common/model/FeedBackBean'
-import { IResult } from '../../common/model/IResult'
-import { PAGE_START, LOG_PAGE_SIZE, TOAST_MS, FEEDBACK_UNREAD } from '../../common/constants/Constants'
+import { COLORS } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { YqhButton } from '../views/yqhButton'
+import { getFeedbackList, deleteFeedback } from '../viewmodel/feedback'
+import { Feedback, FeedBackListBean } from '../model/FeedBackBean'
+import { IResult } from '../model/IResult'
+import { PAGE_START, LOG_PAGE_SIZE, TOAST_MS, FEEDBACK_UNREAD } from '../common/constants/Constants'
 
 @Component
 export struct YqhFeedback {

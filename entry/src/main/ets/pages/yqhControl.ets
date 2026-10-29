@@ -2,14 +2,14 @@
 // 由 yqhIndex 的"车控" TabContent 组装（C5：底部模块切换由根 Navigation + Tabs 承载）
 // 注意：TouchEvent / TouchType 为 ArkTS 全局类型，不需要（也不能）从 @kit.ArkUI 导入
 import { promptAction } from '@kit.ArkUI'
-import { COLORS } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { YqhToggle } from '../../common/ui/yqhToggle'
-import { getCarState, changeCarState, moveCar } from '../../common/api/car'
-import { CarStat } from '../../common/model/CarStateBean'
-import { CarStateChange } from '../../common/model/ApiReq'
-import { IResult } from '../../common/model/IResult'
-import { getCarVin } from '../../common/utils/StorageUtils'
+import { COLORS } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { YqhToggle } from '../views/yqhToggle'
+import { getCarState, changeCarState, moveCar } from '../viewmodel/car'
+import { CarStat } from '../model/CarStateBean'
+import { CarStateChange } from '../model/ApiReq'
+import { IResult } from '../model/IResult'
+import { getCarVin } from '../common/utils/StorageUtils'
 import {
   SWITCH_ON,
   SWITCH_OFF,
@@ -19,7 +19,7 @@ import {
   MOVE_RIGHT,
   MOVE_STOP,
   TOAST_MS
-} from '../../common/constants/Constants'
+} from '../common/constants/Constants'
 
 @Component
 export struct YqhControl {

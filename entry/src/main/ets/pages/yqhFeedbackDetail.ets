@@ -1,10 +1,10 @@
 // 反馈详情（M7，接口 4.9.3）：反馈内容 + 官方回复
 import { promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { getFeedbackDetail } from '../../common/api/feedback'
-import { Feedback } from '../../common/model/FeedBackBean'
-import { TOAST_MS, FEEDBACK_UNREAD } from '../../common/constants/Constants'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { getFeedbackDetail } from '../viewmodel/feedback'
+import { Feedback } from '../model/FeedBackBean'
+import { TOAST_MS, FEEDBACK_UNREAD } from '../common/constants/Constants'
 
 @Component
 export struct YqhFeedbackDetail {

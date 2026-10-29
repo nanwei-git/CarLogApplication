@@ -1,10 +1,10 @@
 // 认证相关接口函数（登录/注册/用户信息/绑车）
-import { post } from '../utils/RequestUtil'
-import { ApiPath, USE_MOCK } from '../constants/HttpApi'
+import { post } from '../common/utils/RequestUtil'
+import { ApiPath, USE_MOCK } from '../common/constants/HttpApi'
 import { IResult } from '../model/IResult'
 import { UserInfoBean } from '../model/UserInfoBean'
 import { RegisterReq, LoginReq, BindReq, EmptyReq } from '../model/ApiReq'
-import { mockLogin, mockGetUserInfo, mockRegister, mockBindCar } from '../utils/MockData'
+import { mockLogin, mockGetUserInfo, mockRegister, mockBindCar } from '../common/utils/MockData'
 
 export function getLogin(username: string, password: string): Promise<IResult> {
   if (USE_MOCK) {

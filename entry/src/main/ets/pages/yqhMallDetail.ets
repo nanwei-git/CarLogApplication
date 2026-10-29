@@ -1,9 +1,9 @@
 // 商城详情（M8b，自定义功能 C4）：价格 / 优惠 / 描述 / 收藏 + 产品评价
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { YqhButton } from '../../common/ui/yqhButton'
-import { getMallList, toggleFav } from '../../common/api/mall'
-import { MallProduct, Review } from '../../common/model/MallBean'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { YqhButton } from '../views/yqhButton'
+import { getMallList, toggleFav } from '../viewmodel/mall'
+import { MallProduct, Review } from '../model/MallBean'
 
 @Component
 export struct YqhMallDetail {

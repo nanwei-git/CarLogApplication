@@ -1,13 +1,13 @@
 // 本地 mock（USE_MOCK=true 时启用）；字段与真接口返回一致，便于离线验收 UI
-import { IResult } from '../model/IResult'
-import { UserInfoBean } from '../model/UserInfoBean'
-import { RegisterReq } from '../model/ApiReq'
-import { CarInfoBean } from '../model/CarInfoBean'
-import { CarStat } from '../model/CarStateBean'
-import { CarStateChange } from '../model/ApiReq'
-import { OperationLog } from '../model/CarLogBean'
-import { Feedback, FeedBackListBean } from '../model/FeedBackBean'
-import { MallProduct, Review } from '../model/MallBean'
+import { IResult } from '../../model/IResult'
+import { UserInfoBean } from '../../model/UserInfoBean'
+import { RegisterReq } from '../../model/ApiReq'
+import { CarInfoBean } from '../../model/CarInfoBean'
+import { CarStat } from '../../model/CarStateBean'
+import { CarStateChange } from '../../model/ApiReq'
+import { OperationLog } from '../../model/CarLogBean'
+import { Feedback, FeedBackListBean } from '../../model/FeedBackBean'
+import { MallProduct, Review } from '../../model/MallBean'
 import {
   SWITCH_ON,
   SWITCH_OFF,

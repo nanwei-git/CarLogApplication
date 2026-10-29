@@ -1,6 +1,6 @@
 // 通用 UI 组件（封存复用）：半透明玻璃卡
 // 用法：yqhGlassCard({ pad: 16 }) { Column(){ ... } }
-import { COLORS } from '../style/Style'
+import { COLORS } from '../common/style/Style'
 
 @Component
 export struct YqhGlassCard {

@@ -1,6 +1,6 @@
 // 通用 UI 组件（封存复用）：主/次按钮，薄荷主色，零业务数据
 // 用法：YqhButton({ text: '绑定车辆', primary: true, onBtnClick: () => {...} })
-import { COLORS } from '../style/Style'
+import { COLORS } from '../common/style/Style'
 
 @Component
 export struct YqhButton {

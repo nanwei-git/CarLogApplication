@@ -1,14 +1,14 @@
 // 首页智能空调（M5，接口 4.6/4.7）：AC 开关 / 内外循环 / 制冷 / 除雾 + 温度±
 // 每次操作只传变更字段 → 成功后重新 getCarState 回写刷新
 import { promptAction } from '@kit.ArkUI'
-import { COLORS } from '../../../common/style/Style'
-import { YqhGlassCard } from '../../../common/ui/yqhGlassCard'
-import { YqhToggle } from '../../../common/ui/yqhToggle'
-import { getCarState, changeCarState } from '../../../common/api/car'
-import { CarStat } from '../../../common/model/CarStateBean'
-import { CarStateChange } from '../../../common/model/ApiReq'
-import { IResult } from '../../../common/model/IResult'
-import { getCarVin } from '../../../common/utils/StorageUtils'
+import { COLORS } from '../../common/style/Style'
+import { YqhGlassCard } from '../yqhGlassCard'
+import { YqhToggle } from '../yqhToggle'
+import { getCarState, changeCarState } from '../../viewmodel/car'
+import { CarStat } from '../../model/CarStateBean'
+import { CarStateChange } from '../../model/ApiReq'
+import { IResult } from '../../model/IResult'
+import { getCarVin } from '../../common/utils/StorageUtils'
 import {
   TEMP_MIN,
   TEMP_MAX,
@@ -17,7 +17,7 @@ import {
   SWITCH_ON,
   SWITCH_OFF,
   TOAST_MS
-} from '../../../common/constants/Constants'
+} from '../../common/constants/Constants'
 
 @Component
 export struct YqhAirConditionComp {

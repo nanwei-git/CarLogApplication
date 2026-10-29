@@ -1,10 +1,10 @@
 // 注册页（M2）：两次密码一致校验、必填校验、调用 getRegister（账号已存在由服务器 msg 提示）
 import { router, promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../../common/style/Style'
-import { YqhGlassCard } from '../../common/ui/yqhGlassCard'
-import { getRegister } from '../../common/api/auth'
-import { IResult } from '../../common/model/IResult'
-import { RegisterReq } from '../../common/model/ApiReq'
+import { COLORS, BG_GRADIENT } from '../common/style/Style'
+import { YqhGlassCard } from '../views/yqhGlassCard'
+import { getRegister } from '../viewmodel/auth'
+import { IResult } from '../model/IResult'
+import { RegisterReq } from '../model/ApiReq'
 
 @Entry
 @Component
@@ -37,7 +37,7 @@ struct YqhRegister {
       .then((res: IResult) => {
         if (res.code === 200 || res.code === 0) {
           promptAction.showToast({ message: '注册成功', duration: 2000 })
-          router.replaceUrl({ url: 'pages/yqhcar/yqhLogin', params: { username: this.username } })
+          router.replaceUrl({ url: 'pages/yqhLogin', params: { username: this.username } })
         } else {
           // 账号已存在 / 其他错误：直接提示服务器返回信息
           promptAction.showToast({ message: res.msg || '注册失败', duration: 2000 })

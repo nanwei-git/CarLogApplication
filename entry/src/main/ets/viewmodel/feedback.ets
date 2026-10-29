@@ -1,16 +1,16 @@
 // 反馈接口函数（4.9.1 列表 / 4.9.2 新增 / 4.9.3 详情 / 4.9.4 删除）
-import { post } from '../utils/RequestUtil'
-import { ApiPath, USE_MOCK } from '../constants/HttpApi'
+import { post } from '../common/utils/RequestUtil'
+import { ApiPath, USE_MOCK } from '../common/constants/HttpApi'
 import { IResult } from '../model/IResult'
 import { Feedback, FeedBackListBean, parseFeedback } from '../model/FeedBackBean'
 import { FeedbackPageReq, FeedbackAddReq, FeedbackIdReq } from '../model/ApiReq'
-import { FEEDBACK_UNREAD } from '../constants/Constants'
+import { FEEDBACK_UNREAD } from '../common/constants/Constants'
 import {
   mockGetFeedbackList,
   mockAddFeedback,
   mockGetFeedbackDetail,
   mockDeleteFeedback
-} from '../utils/MockData'
+} from '../common/utils/MockData'
 
 // 4.9.1 反馈列表（分页）
 export function getFeedbackList(pageNum: number, pageSize: number): Promise<FeedBackListBean> {

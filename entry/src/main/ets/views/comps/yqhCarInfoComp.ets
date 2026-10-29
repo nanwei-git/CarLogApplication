@@ -1,13 +1,13 @@
 // 首页车辆信息卡（M4，接口 4.5）：车辆名称 / 可续航里程 / 电池电量+百分比 / 更新时间
 // 自取数 + 自管加载态，业务页只做组装（规范第 11 条）
 import { promptAction } from '@kit.ArkUI'
-import { COLORS } from '../../../common/style/Style'
-import { YqhGlassCard } from '../../../common/ui/yqhGlassCard'
-import { YqhButton } from '../../../common/ui/yqhButton'
-import { getCarInfo } from '../../../common/api/car'
-import { CarInfoBean } from '../../../common/model/CarInfoBean'
-import { getCarVin } from '../../../common/utils/StorageUtils'
-import { TOAST_MS } from '../../../common/constants/Constants'
+import { COLORS } from '../../common/style/Style'
+import { YqhGlassCard } from '../yqhGlassCard'
+import { YqhButton } from '../yqhButton'
+import { getCarInfo } from '../../viewmodel/car'
+import { CarInfoBean } from '../../model/CarInfoBean'
+import { getCarVin } from '../../common/utils/StorageUtils'
+import { TOAST_MS } from '../../common/constants/Constants'
 
 @Component
 export struct YqhCarInfoComp {
