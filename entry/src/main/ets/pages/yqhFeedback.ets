@@ -1,9 +1,9 @@
 // 反馈列表（M7，接口 4.9.1/4.9.4）：下拉刷新 + 上拉加载 + 左滑删除（二次确认）
 // 由 yqhIndex 的"反馈" TabContent 组装；列表→详情走 NavDestination（C5）
+// 原型对齐：标题「反馈列表」+ 右上圆形「+」；卡片 时间(灰)/内容(黑两行)/分隔线/查看详情 ›
 import { promptAction } from '@kit.ArkUI'
 import { COLORS } from '../common/style/Style'
 import { YqhGlassCard } from '../views/yqhGlassCard'
-import { YqhButton } from '../views/yqhButton'
 import { getFeedbackList, deleteFeedback } from '../viewmodel/feedback'
 import { Feedback, FeedBackListBean } from '../model/FeedBackBean'
 import { IResult } from '../model/IResult'
@@ -125,32 +125,32 @@ export struct YqhFeedback {
 
   @Builder
   feedbackItem(item: Feedback) {
-    YqhGlassCard({ pad: 14 }) {
-      Column({ space: 6 }) {
-        Row() {
-          Text(item.status === FEEDBACK_UNREAD ? '未读' : '已读')
-            .fontSize(11)
-            .fontColor(item.status === FEEDBACK_UNREAD ? COLORS.danger : COLORS.inkSub)
-          Text(item.createTime)
-            .fontSize(11)
-            .fontColor(COLORS.inkSub)
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
+    YqhGlassCard({ pad: 16 }) {
+      Column({ space: 8 }) {
+        Text(item.createTime)
+          .fontSize(12)
+          .fontColor(COLORS.inkSub)
         Text(item.content)
-          .fontSize(14)
+          .fontSize(15)
           .fontColor(COLORS.ink)
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
-        if (item.reply !== '') {
-          Text('官方回复：' + item.reply)
-            .fontSize(12)
-            .fontColor(COLORS.accentDeep)
-            .maxLines(1)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .width('100%')
+        Divider()
+          .color(COLORS.line)
+          .width('100%')
+        Row() {
+          Blank()
+          Row({ space: 4 }) {
+            Text('查看详情')
+              .fontSize(13)
+              .fontColor(COLORS.accent)
+            Text('›')
+              .fontSize(16)
+              .fontColor(COLORS.inkSub)
+          }
         }
+        .width('100%')
       }
     }
   }
@@ -158,26 +158,25 @@ export struct YqhFeedback {
   build() {
     Column({ space: 12 }) {
       Row() {
-        Text('我的反馈（共 ' + this.total + ' 条）')
-          .fontSize(16)
+        Text('反馈列表')
+          .fontSize(20)
           .fontWeight(FontWeight.Bold)
           .fontColor(COLORS.ink)
-        Column() {
-          YqhButton({
-            text: '写反馈',
-            primary: true,
-            btnHeight: 32,
-            radius: 16,
-            onBtnClick: () => {
-              this.navPathStack.pushPath({ name: 'FeedbackAdd' })
-            }
+        Button('+')
+          .width(40)
+          .height(40)
+          .borderRadius(20)
+          .fontSize(26)
+          .fontColor(COLORS.accent)
+          .backgroundColor(COLORS.card)
+          .border({ width: 1, color: COLORS.line })
+          .onClick(() => {
+            this.navPathStack.pushPath({ name: 'FeedbackAdd' })
           })
-        }
-        .width(88)
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
-      .padding({ left: 16, right: 16 })
+      .padding({ left: 16, right: 16, top: 8 })
 
       if (this.loading) {
         LoadingProgress()
@@ -185,7 +184,7 @@ export struct YqhFeedback {
           .height(28)
           .color(COLORS.accent)
       } else if (this.list.length === 0) {
-        Text('暂无反馈，点击右上角"写反馈"提交')
+        Text('暂无反馈，点击右上角"+"提交')
           .fontSize(13)
           .fontColor(COLORS.inkSub)
           .padding(24)
@@ -200,9 +199,11 @@ export struct YqhFeedback {
               .onClick(() => {
                 this.navPathStack.pushPath({ name: 'FeedbackDetail', param: item.id })
               })
-              .swipeAction({ end: (): void => {
-                this.delBuilder(item)
-              } })
+              .swipeAction({
+                end: (): void => {
+                  this.delBuilder(item)
+                }
+              })
             }, (item: Feedback) => item.id)
             if (this.loadingMore || this.hasMore) {
               ListItem() {

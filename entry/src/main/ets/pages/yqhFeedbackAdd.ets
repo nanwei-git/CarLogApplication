@@ -1,4 +1,5 @@
 // 新增反馈（M7，接口 4.9.2）：≤100 字校验，提交成功后置脏标记并回列表
+// 原型对齐：标题「反馈建议」+ 白卡 TextArea（占位 请输入您的反馈建议（100字以内））+ 底部胶囊「提交」+ toast「意见反馈成功」
 import { promptAction } from '@kit.ArkUI'
 import { COLORS, BG_GRADIENT } from '../common/style/Style'
 import { YqhGlassCard } from '../views/yqhGlassCard'
@@ -32,7 +33,7 @@ export struct YqhFeedbackAdd {
       .then((res: IResult) => {
         this.submitting = false
         if (res.code === 200 || res.code === 0) {
-          this.toast('提交成功')
+          this.toast('意见反馈成功')
           AppStorage.setOrCreate('feedbackDirty', true) // 通知列表刷新
           this.navPathStack.pop()
         } else {
@@ -48,51 +49,51 @@ export struct YqhFeedbackAdd {
   build() {
     Stack() {
       Column() {
-        YqhGlassCard({ pad: 20 }) {
-          Column({ space: 12 }) {
-            Text('新增反馈')
-              .fontSize(18)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(COLORS.ink)
-            TextArea({ placeholder: '请输入您的意见或问题（不超过 100 字）', text: this.content })
-              .width('100%')
-              .height(140)
-              .backgroundColor('rgba(255,255,255,0.75)')
-              .borderRadius(10)
-              .maxLength(FEEDBACK_MAX)
-              .onChange((v: string) => {
-                this.content = v
-              })
-            Row() {
-              Text('')
-              Text(this.content.length + '/' + FEEDBACK_MAX)
-                .fontSize(12)
-                .fontColor(this.content.length > FEEDBACK_MAX ? COLORS.danger : COLORS.inkSub)
+        Text('反馈建议')
+          .fontSize(20)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(COLORS.ink)
+          .width('100%')
+          .padding({ left: 16, bottom: 12 })
+        Scroll() {
+          Column({ space: 16 }) {
+            YqhGlassCard({ pad: 16 }) {
+              Column({ space: 10 }) {
+                TextArea({ placeholder: '请输入您的反馈建议（100字以内）', text: this.content })
+                  .width('100%')
+                  .height(160)
+                  .backgroundColor('#F5F6F8')
+                  .borderRadius(12)
+                  .maxLength(FEEDBACK_MAX)
+                  .onChange((v: string) => {
+                    this.content = v
+                  })
+                Row() {
+                  Blank()
+                  Text(this.content.length + '/' + FEEDBACK_MAX)
+                    .fontSize(12)
+                    .fontColor(this.content.length > FEEDBACK_MAX ? COLORS.danger : COLORS.inkSub)
+                }
+                .width('100%')
+              }
             }
-            .width('100%')
-            .justifyContent(FlexAlign.SpaceBetween)
             YqhButton({
-              text: this.submitting ? '提交中…' : '提交反馈',
+              text: this.submitting ? '提交中…' : '提交',
               primary: true,
               btnEnabled: !this.submitting,
               onBtnClick: () => {
                 this.submit()
               }
             })
-            YqhButton({
-              text: '取消',
-              primary: false,
-              onBtnClick: () => {
-                this.navPathStack.pop()
-              }
-            })
           }
+          .width('100%')
+          .padding(16)
         }
+        .width('100%')
+        .layoutWeight(1)
       }
       .width('100%')
       .height('100%')
-      .padding(24)
-      .justifyContent(FlexAlign.Center)
     }
     .width('100%')
     .height('100%')

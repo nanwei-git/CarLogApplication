@@ -27,7 +27,12 @@ struct YqhIndex {
       NavDestination() {
         YqhFeedbackAdd()
       }
-      .title('新增反馈')
+      .title('反馈建议')
+    } else if (name === 'FeedbackList') {
+      NavDestination() {
+        YqhFeedback()
+      }
+      .title('反馈列表')
     } else if (name === 'FeedbackDetail') {
       NavDestination() {
         YqhFeedbackDetail({ feedbackId: param as string })
