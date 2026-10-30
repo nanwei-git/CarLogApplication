@@ -1,5 +1,6 @@
-// 车控（M6，接口 4.6/4.8）：车门 / 车灯开关（圆形按钮，active 换图）；前后左右移动（方向盘，按下高亮青色，松开停车）
-// 原型对齐：居中标题 + 车顶俯视大图（bg_owner_normal/开门/开灯态切换）+ 左右锁/灯圆按钮 + 底部圆形方向盘
+// 车控（M6，接口 4.6/4.8）：图标按钮网格（新拟态圆形按钮）
+// 锁车/车灯/空调 + 前后左右移动（按住移动、松开停车）
+// 形态参考 Tesla 新拟态；配色沿用浅青白 / 青蓝
 import { promptAction } from '@kit.ArkUI'
 import { COLORS } from '../common/style/Style'
 import { YqhGlassCard } from '../views/yqhGlassCard'
@@ -19,12 +20,14 @@ import {
   TOAST_MS
 } from '../common/constants/Constants'
 
+const NEU_BG: string = '#E9F2F4'
+
 @Component
 export struct YqhControl {
   @State stat: CarStat = new CarStat()
   @State loading: boolean = true
-  @State moving: string = '' // 当前移动提示文案
-  @State pressedDir: string = '' // 方向盘当前按下的方向（用于高亮）
+  @State moving: string = ''
+  @State busy: boolean = false
 
   aboutToAppear(): void {
     this.load()
@@ -51,16 +54,22 @@ export struct YqhControl {
     return v === SWITCH_ON
   }
 
-  // 门/灯开关：只传变更字段，成功后回写刷新
-  private switchDoorLight(field: string, on: boolean): void {
+  private switchField(field: string, on: boolean): void {
+    if (this.busy) {
+      return
+    }
+    this.busy = true
     const change: CarStateChange = { carVin: getCarVin() }
     if (field === 'door') {
       change.door = on ? SWITCH_ON : SWITCH_OFF
-    } else {
+    } else if (field === 'light') {
       change.light = on ? SWITCH_ON : SWITCH_OFF
+    } else {
+      change.acBtn = on ? SWITCH_ON : SWITCH_OFF
     }
     changeCarState(change)
       .then((res: IResult) => {
+        this.busy = false
         if (res.code === 200 || res.code === 0) {
           this.load()
         } else {
@@ -68,6 +77,7 @@ export struct YqhControl {
         }
       })
       .catch(() => {
+        this.busy = false
         this.toast('网络异常，请稍后重试')
       })
   }
@@ -88,20 +98,21 @@ export struct YqhControl {
       })
   }
 
-  // 锁/灯圆形按钮：active 时换图 + 浅青高亮底
+  // 普通圆形开关按钮（锁车/车灯/空调）
   @Builder
-  roundCtrl(iconOff: ResourceStr, iconOn: ResourceStr, active: boolean, label: string, onClick: () => void) {
-    Column({ space: 6 }) {
+  gridBtn(icon: string, label: string, active: boolean, onClick: () => void) {
+    Column({ space: 8 }) {
       Button({ type: ButtonType.Circle }) {
-        Image(active ? iconOn : iconOff)
-          .width(30)
-          .height(30)
+        Text(icon)
+          .fontSize(24)
+          .fontColor(active ? '#FFFFFF' : COLORS.ink)
       }
-      .width(64)
-      .height(64)
-      .borderRadius(32)
-      .backgroundColor(active ? COLORS.highlight : COLORS.card)
-      .border({ width: 1, color: COLORS.line })
+      .width(72)
+      .height(72)
+      .borderRadius(36)
+      .backgroundColor(active ? COLORS.accent : NEU_BG)
+      .shadow({ radius: 10, color: 'rgba(31,35,41,0.12)', offsetX: 4, offsetY: 4 })
+      .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
       .onClick(onClick)
       Text(label)
         .fontSize(13)
@@ -109,40 +120,32 @@ export struct YqhControl {
     }
   }
 
-  // 方向盘方向键：按下高亮青色，松开停车
+  // 方向按钮（按住移动，松开停车）
   @Builder
-  wheelBtn(direction: string, icon: ResourceStr, label: string) {
-    Button({ type: ButtonType.Circle }) {
-      Image(icon)
-        .width(28)
-        .height(28)
-        .fillColor(this.pressedDir === direction ? '#FFFFFF' : COLORS.ink)
-    }
-    .width(64)
-    .height(64)
-    .borderRadius(32)
-    .backgroundColor(this.pressedDir === direction ? COLORS.accent : COLORS.card)
-    .border({ width: 1, color: COLORS.line })
-    .onTouch((e: TouchEvent) => {
-      if (e.type === TouchType.Down) {
-        this.pressedDir = direction
-        this.doMove(direction, label)
-      } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
-        this.pressedDir = ''
-        this.doMove(MOVE_STOP, '停')
+  moveBtn(icon: string, label: string, direction: string) {
+    Column({ space: 8 }) {
+      Button({ type: ButtonType.Circle }) {
+        Text(icon)
+          .fontSize(24)
+          .fontColor(COLORS.ink)
       }
-    })
-  }
-
-  // 俯视图随门/灯状态切换
-  private carImage(): ResourceStr {
-    if (this.isOn(this.stat.door)) {
-      return $r('app.media.bg_owner_open_door')
+      .width(72)
+      .height(72)
+      .borderRadius(36)
+      .backgroundColor(NEU_BG)
+      .shadow({ radius: 10, color: 'rgba(31,35,41,0.12)', offsetX: 4, offsetY: 4 })
+      .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
+      .onTouch((e: TouchEvent) => {
+        if (e.type === TouchType.Down) {
+          this.doMove(direction, label)
+        } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
+          this.doMove(MOVE_STOP, '停')
+        }
+      })
+      Text(label)
+        .fontSize(13)
+        .fontColor(COLORS.inkSub)
     }
-    if (this.isOn(this.stat.light)) {
-      return $r('app.media.bg_owner_open_light')
-    }
-    return $r('app.media.bg_owner_normal')
   }
 
   build() {
@@ -163,74 +166,38 @@ export struct YqhControl {
           .width('100%')
           .textAlign(TextAlign.Center)
 
-        // 车顶俯视大图
+        Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceAround, alignContent: FlexAlign.SpaceAround }) {
+          this.gridBtn('🔒', '锁车', this.isOn(this.stat.door), () => {
+            this.switchField('door', !this.isOn(this.stat.door))
+          })
+          this.gridBtn('💡', '车灯', this.isOn(this.stat.light), () => {
+            this.switchField('light', !this.isOn(this.stat.light))
+          })
+          this.gridBtn('❄', '空调', this.isOn(this.stat.acBtn), () => {
+            this.switchField('ac', !this.isOn(this.stat.acBtn))
+          })
+          this.moveBtn('⬆', '前进', MOVE_FRONT)
+          this.moveBtn('⬇', '后退', MOVE_BACK)
+          this.moveBtn('⬅', '左转', MOVE_LEFT)
+          this.moveBtn('➡', '右转', MOVE_RIGHT)
+        }
+        .width('100%')
+        .padding(8)
+
         YqhGlassCard({ pad: 16 }) {
-          Image(this.carImage())
-            .width('100%')
-            .height(200)
-            .objectFit(ImageFit.Cover)
-            .borderRadius(12)
-        }
-
-        // 左右：锁 / 灯 圆形按钮
-        Row({ space: 48 }) {
-          this.roundCtrl(
-            $r('app.media.ic_door_lock'),
-            $r('app.media.ic_door_lock_active'),
-            this.isOn(this.stat.door),
-            '车门',
-            () => {
-              this.switchDoorLight('door', !this.isOn(this.stat.door))
-            }
-          )
-          this.roundCtrl(
-            $r('app.media.ic_light_open'),
-            $r('app.media.ic_light_open_active'),
-            this.isOn(this.stat.light),
-            '车灯',
-            () => {
-              this.switchDoorLight('light', !this.isOn(this.stat.light))
-            }
-          )
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.Center)
-
-        // 底部圆形方向盘（ic_direction 为中心，四向高亮）
-        Column({ space: 10 }) {
-          Row() {
-            this.wheelBtn(MOVE_FRONT, $r('app.media.ic_direction_up'), '前')
+          Column({ space: 6 }) {
+            Text(this.moving === '' ? '当前状态：静止' : '当前状态：' + this.moving)
+              .fontSize(13)
+              .fontColor(COLORS.accentDeep)
+              .width('100%')
+              .textAlign(TextAlign.Center)
+            Text('按住方向键移动，松开即停车')
+              .fontSize(12)
+              .fontColor(COLORS.inkSub)
+              .width('100%')
+              .textAlign(TextAlign.Center)
           }
-          .width('100%')
-          .justifyContent(FlexAlign.Center)
-          Row({ space: 10 }) {
-            this.wheelBtn(MOVE_LEFT, $r('app.media.ic_direction_left'), '左')
-            Image($r('app.media.ic_direction'))
-              .width(150)
-              .height(150)
-              .objectFit(ImageFit.Contain)
-            this.wheelBtn(MOVE_RIGHT, $r('app.media.ic_direction_right'), '右')
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.Center)
-          Row() {
-            this.wheelBtn(MOVE_BACK, $r('app.media.ic_direction_down'), '后')
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.Center)
         }
-        .width('100%')
-
-        Text(this.moving === '' ? '当前状态：静止' : '当前状态：' + this.moving)
-          .fontSize(13)
-          .fontColor(COLORS.accentDeep)
-          .width('100%')
-          .textAlign(TextAlign.Center)
-        Text('按住方向盘方向键移动，松开即停车')
-          .fontSize(12)
-          .fontColor(COLORS.inkSub)
-          .width('100%')
-          .textAlign(TextAlign.Center)
       }
     }
     .width('100%')
