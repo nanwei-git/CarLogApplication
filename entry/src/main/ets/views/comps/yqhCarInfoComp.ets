@@ -95,7 +95,7 @@ export struct YqhCarInfoComp {
       Progress({ value: this.percent(), total: 100, type: ProgressType.Ring })
         .width(190)
         .height(190)
-        .style({ strokeWidth: 14, strokeRadius: 12 })
+        .style({ strokeWidth: 14 })
         .color(COLORS.accent)
       Column({ space: 2 }) {
         Text(this.info.enduranceMileage === '' ? '--' : this.info.enduranceMileage)
@@ -212,8 +212,11 @@ export struct YqhCarInfoComp {
             }
             .width('100%')
 
-            this.rangeDial()
-              .alignSelf(FlexAlign.Center)
+            Row() {
+              this.rangeDial()
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.Center)
 
             this.quickGrid()
 

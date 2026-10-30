@@ -110,7 +110,7 @@ export struct YqhAirConditionComp {
       Progress({ value: this.tempPercent(), total: 100, type: ProgressType.Ring })
         .width(160)
         .height(160)
-        .style({ strokeWidth: 12, strokeRadius: 10 })
+        .style({ strokeWidth: 12 })
         .color(COLORS.accent)
       Column({ space: 2 }) {
         Text(this.currentTemp() + '℃')
@@ -171,7 +171,7 @@ export struct YqhAirConditionComp {
               Progress({ value: 0, total: 100, type: ProgressType.Ring })
                 .width(160)
                 .height(160)
-                .style({ strokeWidth: 12, strokeRadius: 10 })
+                .style({ strokeWidth: 12 })
                 .color('#D5DCE0')
               Column({ space: 4 }) {
                 Text('❄')
@@ -182,7 +182,7 @@ export struct YqhAirConditionComp {
                   .fontColor(COLORS.inkSub)
               }
             }
-            .alignSelf(FlexAlign.Center)
+            .alignSelf(ItemAlign.Center)
             YqhButton({
               text: '开启空调',
               onBtnClick: () => this.apply({ carVin: getCarVin(), acBtn: SWITCH_ON })
