@@ -1,0 +1,472 @@
+openapi: 3.0.3
+info:
+  title: 车主APP 后端 API（OpenAPI 契约）
+  version: 1.0.0
+  description: |
+    车主APP（鸿蒙 ArkTS）对接的真后端接口定义，依据
+    entry/src/main/ets 中 HttpApi.ets / model / viewmodel 反推整理，供测试与校验使用。
+
+    基础地址：http://121.36.14.143:10001
+    统一约定：
+    - 所有接口均为 POST，Content-Type: application/json
+    - 统一响应信封 { code, msg, token?, data? }
+    - 登录/注册无需鉴权；其余接口需在 Header 带 Authorization: Bearer <token>
+    - 业务码：200 或 0 表示成功；401 表示鉴权未放行/失败
+    说明：具体字段以真服务器实际返回为准，本文件为客户端契约视角的整理。
+servers:
+  - url: http://121.36.14.143:10001
+    description: 真服务器
+security:
+  - bearerAuth: []
+paths:
+  /app/login:
+    post:
+      tags: [认证]
+      summary: 账号密码登录
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginReq' }
+            example: { username: 'zzq1234', password: '666666' }
+      responses:
+        '200':
+          description: 成功（返回 token）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+              example:
+                code: 200
+                msg: 'success'
+                token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx'
+                data: { }
+  /app/register:
+    post:
+      tags: [认证]
+      summary: 注册账号
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterReq' }
+            example:
+              nickName: '杨庆鸿'
+              userName: 'zzq1234'
+              phonenumber: ''
+              sex: '0'
+              avatar: ''
+              password: '666666'
+              roleIds: ['2']
+              birthDate: ''
+              state: '0'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeSimple' }
+              example: { code: 200, msg: '注册成功' }
+  /app/user/info:
+    post:
+      tags: [用户信息]
+      summary: 获取当前登录用户信息（含车辆绑定）
+      operationId: userInfo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmptyObj' }
+            example: { }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeWithUserInfo' }
+              example:
+                code: 200
+                msg: 'success'
+                data:
+                  carVin: '00661718330'
+                  carId: '1'
+                  user:
+                    userId: '1'
+                    userName: 'zzq1234'
+                    nickName: '杨庆鸿'
+                    avatar: ''
+                    phonenumber: ''
+  /app/car/bind:
+    post:
+      tags: [车辆]
+      summary: 绑定车辆（按 VIN）
+      operationId: bindCar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BindReq' }
+            example: { carVin: '00661718330' }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeSimple' }
+              example: { code: 200, msg: '绑车成功' }
+  /app/car/info:
+    post:
+      tags: [车辆]
+      summary: 车辆管理信息（名称/续航/电量/更新时间）
+      operationId: carInfo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarInfoReq' }
+            example: { carId: '1' }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeWithCarInfo' }
+  /app/car/state:
+    post:
+      tags: [车辆]
+      summary: 车辆实时状态（门/灯/空调/循环/除雾/温度）
+      operationId: carState
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarInfoReq' }
+            example: { carId: '1' }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeWithCarStat' }
+  /app/car/state/change:
+    post:
+      tags: [车辆]
+      summary: 变更车辆状态（仅传变更字段）
+      operationId: carStateChange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarStateChange' }
+            example:
+              carVin: '00661718330'
+              acBtn: '1'
+              setTemp: '26'
+              circulate: '0'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeSimple' }
+              example: { code: 200, msg: 'ok' }
+  /app/car/move:
+    post:
+      tags: [车辆]
+      summary: 车辆移动指令（前/后/左/右/停车）
+      operationId: carMove
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CarMoveReq' }
+            example:
+              carVin: '00661718330'
+              direction: 'front'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeSimple' }
+              example: { code: 200, msg: '指令已下发' }
+  /app/feedback/list:
+    post:
+      tags: [反馈]
+      summary: 反馈列表（分页）
+      operationId: feedbackList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FeedbackPageReq' }
+            example: { pageNum: 1, pageSize: 10 }
+      responses:
+        '200':
+          description: 成功，data 内含 total 与 rows
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeWithFeedbackList' }
+  /app/feedback/add:
+    post:
+      tags: [反馈]
+      summary: 新增反馈
+      operationId: feedbackAdd
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FeedbackAddReq' }
+            example: { content: '车机低温启动较慢，希望优化。', status: '0' }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeSimple' }
+              example: { code: 200, msg: '提交成功' }
+  /app/feedback/detail:
+    post:
+      tags: [反馈]
+      summary: 反馈详情（含官方回复）
+      operationId: feedbackDetail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FeedbackIdReq' }
+            example: { id: '1' }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeWithFeedback' }
+  /app/feedback/delete:
+    post:
+      tags: [反馈]
+      summary: 删除反馈
+      operationId: feedbackDelete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FeedbackIdReq' }
+            example: { id: '1' }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnvelopeSimple' }
+              example: { code: 200, msg: '删除成功' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    EmptyObj:
+      type: object
+      description: 空请求体（如 /app/user/info 发送 {}）
+    LoginReq:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, example: 'zzq1234' }
+        password: { type: string, example: '666666' }
+    RegisterReq:
+      type: object
+      required: [userName, password, roleIds]
+      properties:
+        nickName: { type: string, example: '杨庆鸿' }
+        userName: { type: string, example: 'zzq1234' }
+        phonenumber: { type: string, example: '' }
+        sex: { type: string, enum: ['0', '1'], example: '0' }
+        avatar: { type: string, example: '' }
+        password: { type: string, example: '666666' }
+        roleIds:
+          type: array
+          items: { type: string }
+          example: ['2']
+        birthDate: { type: string, example: '' }
+        state: { type: string, example: '0' }
+    BindReq:
+      type: object
+      required: [carVin]
+      properties:
+        carVin: { type: string, example: '00661718330' }
+    CarInfoReq:
+      type: object
+      required: [carId]
+      properties:
+        carId: { type: string, example: '1' }
+    CarStateChange:
+      type: object
+      required: [carVin]
+      properties:
+        carVin: { type: string, example: '00661718330' }
+        acBtn: { type: string, enum: ['0', '1'], description: '空调开关' }
+        circulate: { type: string, enum: ['0', '1'], description: '0外循环 1内循环' }
+        clearFog: { type: string, enum: ['0', '1'], description: '除雾' }
+        setTemp: { type: string, example: '26', description: '空调设定温度' }
+        door: { type: string, enum: ['0', '1'], description: '车门' }
+        light: { type: string, enum: ['0', '1'], description: '车灯' }
+        windLevel: { type: string, example: '2', description: '风量等级' }
+        fanState: { type: string, enum: ['0', '1'], description: '制冷/送风' }
+    CarMoveReq:
+      type: object
+      required: [carVin, direction]
+      properties:
+        carVin: { type: string, example: '00661718330' }
+        direction:
+          type: string
+          enum: [front, back, left, right, stop]
+          example: 'front'
+    FeedbackPageReq:
+      type: object
+      required: [pageNum, pageSize]
+      properties:
+        pageNum: { type: integer, example: 1 }
+        pageSize: { type: integer, example: 10 }
+    FeedbackAddReq:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string, example: '车机低温启动较慢，希望优化。' }
+        status: { type: string, enum: ['0', '1'], description: '0未读 1已读（客户端默认传 0）' }
+    FeedbackIdReq:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string, example: '1' }
+    User:
+      type: object
+      properties:
+        userId: { type: string, example: '1' }
+        userName: { type: string, example: 'zzq1234' }
+        nickName: { type: string, example: '杨庆鸿' }
+        avatar: { type: string, example: '' }
+        phonenumber: { type: string, example: '' }
+    UserInfo:
+      type: object
+      properties:
+        carVin: { type: string, example: '00661718330' }
+        carId: { type: string, example: '1' }
+        user: { $ref: '#/components/schemas/User' }
+    BatteryPower:
+      type: object
+      properties:
+        power: { type: string, description: 剩余电量 kWh, example: '62.5' }
+        percent: { type: number, description: 电量百分比, example: 78 }
+    CarInfo:
+      type: object
+      properties:
+        id: { type: string, example: '1' }
+        carName: { type: string, example: '小米SU7' }
+        brand: { type: string, example: '小米' }
+        carVin: { type: string, example: '00661718330' }
+        batteryPower: { $ref: '#/components/schemas/BatteryPower' }
+        enduranceMileage: { type: string, example: '520' }
+        horsePower: { type: string, example: '299' }
+        maxPower: { type: string, example: '220' }
+        maxTorque: { type: string, example: '400' }
+        carSize: { type: string, example: '4997×1963×1455' }
+        wheelBase: { type: string, example: '3000' }
+        batteryCapacity: { type: string, example: '73.6' }
+        nominalVoltage: { type: string, example: '400' }
+        totalTripNum: { type: number, example: 128 }
+        totalTripMile: { type: string, example: '8632' }
+        createYm: { type: string, example: '2026-10' }
+    CarStat:
+      type: object
+      properties:
+        carId: { type: string, example: '1' }
+        carVin: { type: string, example: '00661718330' }
+        door: { type: string, enum: ['0', '1'], example: '0' }
+        light: { type: string, enum: ['0', '1'], example: '0' }
+        temperature: { type: string, example: '26' }
+        windLevel: { type: string, example: '2' }
+        circulate: { type: string, enum: ['0', '1'], example: '0' }
+        setTemp: { type: string, example: '26' }
+        acBtn: { type: string, enum: ['0', '1'], example: '1' }
+        clearFog: { type: string, enum: ['0', '1'], example: '0' }
+        fanState: { type: string, enum: ['0', '1'], example: '1' }
+    Feedback:
+      type: object
+      properties:
+        id: { type: string, example: '1' }
+        userId: { type: string, example: '1' }
+        userName: { type: string, example: 'yqh' }
+        nickName: { type: string, example: '杨庆鸿' }
+        phonenumber: { type: string, example: '' }
+        content: { type: string, example: '第 1 条反馈：车机在低温启动时响应较慢。' }
+        status: { type: string, enum: ['0', '1'], description: '0未读 1已读', example: '0' }
+        picUrl: { type: string, example: '' }
+        delFlag: { type: string, example: '0' }
+        replyRead: { type: string, example: '' }
+        createTime: { type: string, example: '2026-10-01 10:00' }
+        updateTime: { type: string, example: '' }
+        reply: { type: string, example: '感谢反馈，工程师已跟进处理。' }
+    FeedbackListData:
+      type: object
+      properties:
+        total: { type: number, example: 12 }
+        rows:
+          type: array
+          items: { $ref: '#/components/schemas/Feedback' }
+    IResult:
+      type: object
+      required: [code, msg]
+      properties:
+        code: { type: integer, description: 业务码，200/0 成功，401 鉴权失败, example: 200 }
+        msg: { type: string, example: 'success' }
+        token: { type: string, description: 登录成功下发，后续 Bearer 携带 }
+        data: { type: object, nullable: true, description: 业务数据负载，结构见各接口 }
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResult'
+        - type: object
+          properties:
+            token: { type: string, description: 登录成功必返回, example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx' }
+            data: { type: object, nullable: true, description: 视后端而定，可能为空或用户信息 }
+    EnvelopeSimple:
+      allOf:
+        - $ref: '#/components/schemas/IResult'
+        - type: object
+          properties:
+            data: { type: object, nullable: true }
+    EnvelopeWithUserInfo:
+      allOf:
+        - $ref: '#/components/schemas/IResult'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/UserInfo' }
+    EnvelopeWithCarInfo:
+      allOf:
+        - $ref: '#/components/schemas/IResult'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/CarInfo' }
+    EnvelopeWithCarStat:
+      allOf:
+        - $ref: '#/components/schemas/IResult'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/CarStat' }
+    EnvelopeWithFeedback:
+      allOf:
+        - $ref: '#/components/schemas/IResult'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Feedback' }
+    EnvelopeWithFeedbackList:
+      allOf:
+        - $ref: '#/components/schemas/IResult'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/FeedbackListData' }
