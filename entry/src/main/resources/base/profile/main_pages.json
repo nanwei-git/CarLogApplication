@@ -20,7 +20,6 @@
     "pages/leson5-new/yqhNavigationPage",
     "pages/leson7-yangnawtabs/newtabsPage",
     "pages/zuoye2/FeedbackTabPage",
-    "pages/Perferences/FonuSizePreferencesPage",
-    "pages/login/LoginPage"
+    "pages/Perferences/FonuSizePreferencesPage"
   ]
 }
