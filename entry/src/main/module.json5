@@ -31,7 +31,6 @@
         "startWindowIcon": "$media:startIcon",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
-        "allowCleartextTraffic": true,
         "skills": [
           {
             "entities": [

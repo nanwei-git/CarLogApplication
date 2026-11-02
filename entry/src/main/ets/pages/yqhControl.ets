@@ -5,11 +5,10 @@ import { neu } from '../common/style/Style'
 import { YqhNeuCard } from '../common/ui/yqhNeuCard'
 import { YqhNeuCircleButton } from '../common/ui/yqhNeuCircleButton'
 import { YqhNeuChip } from '../common/ui/yqhNeuChip'
-import { getCarState, changeCarState, moveCar } from '../viewmodel/car'
+import { getCarState, changeCarState, moveCar, controlDoor, controlLight } from '../viewmodel/car'
 import { CarStat } from '../model/CarStateBean'
-import { CarStateChange } from '../model/ApiReq'
 import { IResult } from '../model/IResult'
-import { getCarVin } from '../common/utils/StorageUtils'
+import { getCarVin, getCarId } from '../common/utils/StorageUtils'
 import {
   SWITCH_ON,
   SWITCH_OFF,
@@ -59,15 +58,17 @@ export struct YqhControl {
       return
     }
     this.busy = true
-    const change: CarStateChange = { carVin: getCarVin() }
+    const val: string = on ? SWITCH_ON : SWITCH_OFF
+    const carId: string = getCarId()
+    let req: Promise<IResult>
     if (field === 'door') {
-      change.door = on ? SWITCH_ON : SWITCH_OFF
+      req = controlDoor(carId, val)
     } else if (field === 'light') {
-      change.light = on ? SWITCH_ON : SWITCH_OFF
+      req = controlLight(carId, val)
     } else {
-      change.acBtn = on ? SWITCH_ON : SWITCH_OFF
+      req = changeCarState({ carVin: getCarVin(), acBtn: val })
     }
-    changeCarState(change)
+    req
       .then((res: IResult) => {
         this.busy = false
         if (res.code === 200 || res.code === 0) {

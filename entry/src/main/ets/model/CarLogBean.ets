@@ -17,9 +17,9 @@ export function parseCarLogs(data: ESObject): OperationLog[] {
     const d: ESObject = rows[i] as ESObject
     const log: OperationLog = new OperationLog()
     log.id = (d['id'] as string) ?? ''
-    log.title = (d['title'] as string) ?? ''
-    log.desc = (d['desc'] as string) ?? ''
-    log.time = (d['time'] as string) ?? ''
+    log.title = (d['operaType'] as string) ?? ''
+    log.desc = (d['operaContent'] as string) ?? ''
+    log.time = (d['createTime'] as string) ?? ''
     list.push(log)
   }
   return list

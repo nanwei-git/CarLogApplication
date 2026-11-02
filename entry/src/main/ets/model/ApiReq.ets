@@ -50,6 +50,13 @@ export interface FeedbackIdReq {
   id: string
 }
 
+// 车门/车灯控制请求体（接口 4.8.1/4.8.2）：{ carId, door|light }
+export class CarControlReq {
+  carId: string = ''
+  door: string = ''
+  light: string = ''
+}
+
 // 车辆状态变更请求体（接口 4.7）：接口形态同 CarStateChange，独立声明避免 UI 层反向依赖 model
 export interface CarStateChange {
   carVin: string

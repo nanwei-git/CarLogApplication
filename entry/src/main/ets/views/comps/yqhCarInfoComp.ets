@@ -49,8 +49,8 @@ export struct YqhCarInfoComp {
   }
 
   private percent(): number {
-    const p: number = this.info.batteryPower.percent
-    if (p < 0) {
+    const p: number = Number(this.info.batteryPower)
+    if (isNaN(p) || p < 0) {
       return 0
     }
     if (p > 100) {

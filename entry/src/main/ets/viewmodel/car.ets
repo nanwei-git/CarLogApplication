@@ -1,33 +1,37 @@
-// 车辆接口函数（4.5 车辆信息 / 4.6 车辆状态 / 4.7 状态变更 / 4.8 移动）
-import { post } from '../common/utils/RequestUtil'
+// 车辆接口函数（4.5 车辆信息 / 4.6 车辆状态 / 4.7 状态变更 / 4.8 控制 / 4.10 日志）
+// 全量直连真服务器（USE_MOCK=false）；实现按《鸿蒙智能座舱系统接口文档V1.1》
+import { post, get, put } from '../common/utils/RequestUtil'
 import { ApiPath, USE_MOCK } from '../common/constants/HttpApi'
 import { IResult } from '../model/IResult'
 import { CarInfoBean, parseCarInfo } from '../model/CarInfoBean'
 import { CarStat, parseCarStat } from '../model/CarStateBean'
 import { OperationLog, parseCarLogs } from '../model/CarLogBean'
-import { CarInfoReq, CarStateChange, CarMoveReq } from '../model/ApiReq'
+import { CarStateChange, CarControlReq } from '../model/ApiReq'
 import { getCarId, getCarVin } from '../common/utils/StorageUtils'
-import { mockGetCarInfo, mockGetCarState, mockChangeCarState, mockMoveCar, mockGetCarLogs } from '../common/utils/MockData'
+import {
+  mockGetCarInfo, mockGetCarState, mockChangeCarState, mockGetCarLogs
+} from '../common/utils/MockData'
 
-// 4.5 车辆管理信息（名称/续航/电量/更新时间）
+// 4.5 车辆管理信息（GET /cockpit/info/{id}，id=车辆id）
 export function getCarInfo(): Promise<CarInfoBean> {
   if (USE_MOCK) {
     return mockGetCarInfo()
   }
-  const req: CarInfoReq = { carId: getCarId() }
-  return post(ApiPath.carInfo, req).then((res: IResult) => parseCarInfo(res.data as ESObject))
+  const carId: string = getCarId()
+  return get(ApiPath.carInfo.replace('{id}', carId))
+    .then((res: IResult) => parseCarInfo(res.data as ESObject))
 }
 
-// 4.6 车辆状态（门/灯/空调/循环/除雾/温度）
+// 4.6 车辆状态（GET /cockpit/state/{carVin}）
 export function getCarState(): Promise<CarStat> {
   if (USE_MOCK) {
     return mockGetCarState()
   }
-  const req: CarInfoReq = { carId: getCarId() }
-  return post(ApiPath.carState, req).then((res: IResult) => parseCarStat(res.data as ESObject))
+  return get(ApiPath.carState.replace('{carVin}', getCarVin()))
+    .then((res: IResult) => parseCarStat(res.data as ESObject))
 }
 
-// 4.7 变更车辆状态：只传变更字段，成功后由调用方重新 getCarState 回写刷新
+// 4.7 修改状态（PUT /cockpit/state）：空调开关/温度/循环/除雾/风量/车门/车灯等
 export function changeCarState(change: CarStateChange): Promise<IResult> {
   if (change.carVin === '') {
     change.carVin = getCarVin()
@@ -35,19 +39,49 @@ export function changeCarState(change: CarStateChange): Promise<IResult> {
   if (USE_MOCK) {
     return mockChangeCarState(change)
   }
-  return post(ApiPath.carStateChange, change)
+  return put(ApiPath.carStateChange, change)
 }
 
-// 4.8 车辆移动：direction = front/back/left/right，stop 表示停车
+// 4.8.1 车门控制（POST /cockpit/control/door）
+export function controlDoor(carId: string, door: string): Promise<IResult> {
+  const req: CarControlReq = new CarControlReq()
+  req.carId = carId
+  req.door = door
+  return post(ApiPath.carControlDoor, req)
+}
+
+// 4.8.2 车灯控制（POST /cockpit/control/light）
+export function controlLight(carId: string, light: string): Promise<IResult> {
+  const req: CarControlReq = new CarControlReq()
+  req.carId = carId
+  req.light = light
+  return post(ApiPath.carControlLight, req)
+}
+
+// 4.8.3~4.8.7 车辆移动（POST /cockpit/control/{stop|right|left|move|back}/{carId}）
 export function moveCar(direction: string): Promise<IResult> {
-  if (USE_MOCK) {
-    return mockMoveCar(direction)
+  const carId: string = getCarId()
+  let path: string = ApiPath.carControlStop.replace('{carId}', carId)
+  if (direction === 'front') {
+    path = ApiPath.carControlMove.replace('{carId}', carId)
+  } else if (direction === 'back') {
+    path = ApiPath.carControlBack.replace('{carId}', carId)
+  } else if (direction === 'left') {
+    path = ApiPath.carControlLeft.replace('{carId}', carId)
+  } else if (direction === 'right') {
+    path = ApiPath.carControlRight.replace('{carId}', carId)
   }
-  const req: CarMoveReq = { carVin: getCarVin(), direction: direction }
-  return post(ApiPath.carMove, req)
+  return post(path)
 }
 
-// 车辆操作日志（首页「信息」页）：目前本地生成（SPEC 无对应接口，预留解析与请求位）
+// 4.10 车辆操作日志（GET /cockpit/log/list：响应顶层含 total / rows）
 export function getCarLogs(): Promise<OperationLog[]> {
-  return mockGetCarLogs()
+  if (USE_MOCK) {
+    return mockGetCarLogs()
+  }
+  const url: string = ApiPath.logList + '?pageNum=1&pageSize=20&operaContent='
+  return get(url).then((res: IResult) => {
+    const rows: ESObject[] = ((res as ESObject)['rows'] as ESObject[]) ?? []
+    return parseCarLogs(rows)
+  })
 }

@@ -7,7 +7,7 @@ import { YqhNeuCard } from '../common/ui/yqhNeuCard'
 import { YqhNeuCircleButton } from '../common/ui/yqhNeuCircleButton'
 import { YqhNeuChip } from '../common/ui/yqhNeuChip'
 import { getFeedbackList, deleteFeedback } from '../viewmodel/feedback'
-import { Feedback, FeedBackListBean } from '../model/FeedBackBean'
+import { Feedback } from '../model/FeedBackBean'
 import { IResult } from '../model/IResult'
 import { PAGE_START, LOG_PAGE_SIZE, TOAST_MS, FEEDBACK_READ } from '../common/constants/Constants'
 
@@ -56,14 +56,14 @@ export struct YqhFeedback {
 
   private load(reset: boolean): void {
     getFeedbackList(this.pageNum, LOG_PAGE_SIZE)
-      .then((res: FeedBackListBean) => {
+      .then((res: Feedback[]) => {
         if (reset) {
-          this.list = res.rows
+          this.list = res
         } else {
-          this.list = this.list.concat(res.rows)
+          this.list = this.list.concat(res)
         }
-        this.total = res.total
-        this.hasMore = this.list.length < res.total
+        this.total = res.length
+        this.hasMore = false // 文档列表接口无分页字段，拉一次即止
         this.loading = false
         this.loadingMore = false
         this.refreshing = false

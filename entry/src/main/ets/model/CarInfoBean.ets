@@ -1,15 +1,11 @@
-// 车辆管理信息（接口 4.5 data）；字段与 SPEC §4 一致，具体以真服务器返回为准
-export class BatteryPower {
-  power: string = '' // 剩余电量（kWh）
-  percent: number = 0 // 电量百分比
-}
-
+// 车辆管理信息（接口 4.5 data）；字段与《鸿蒙智能座舱系统接口文档V1.1》§4.5 一致
+// 注意：文档中 batteryPower 为字符串（如 "999"），非对象
 export class CarInfoBean {
   id: string = ''
   carName: string = ''
   brand: string = ''
   carVin: string = ''
-  batteryPower: BatteryPower = new BatteryPower()
+  batteryPower: string = '' // 电池电量（字符串，如 "999"）
   enduranceMileage: string = '' // 可续航里程
   horsePower: string = ''
   maxPower: string = ''
@@ -45,10 +41,6 @@ export function parseCarInfo(data: ESObject): CarInfoBean {
   bean.totalTripNum = (d['totalTripNum'] as number) ?? 0
   bean.totalTripMile = (d['totalTripMile'] as string) ?? ''
   bean.createYm = (d['createYm'] as string) ?? ''
-  const bp: ESObject = d['batteryPower'] as ESObject
-  if (bp !== undefined && bp !== null) {
-    bean.batteryPower.power = (bp['power'] as string) ?? ''
-    bean.batteryPower.percent = (bp['percent'] as number) ?? 0
-  }
+  bean.batteryPower = (d['batteryPower'] as string) ?? ''
   return bean
 }

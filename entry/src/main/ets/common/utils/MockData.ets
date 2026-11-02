@@ -54,8 +54,7 @@ export function mockGetCarInfo(): Promise<CarInfoBean> {
     bean.carName = '小米SU7'
     bean.brand = '小米'
     bean.carVin = '00661718330'
-    bean.batteryPower.power = '62.5'
-    bean.batteryPower.percent = 78
+    bean.batteryPower = '78'
     bean.enduranceMileage = '520'
     bean.batteryCapacity = '73.6'
     bean.nominalVoltage = '400'
