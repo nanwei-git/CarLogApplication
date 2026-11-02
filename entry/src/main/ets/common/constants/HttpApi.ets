@@ -33,9 +33,8 @@ export const ApiPath: ApiPathMap = {
 }
 
 // C2：false 直连真服务器；true 走本地 mock
-// 当前置 true：真服务器 /app/register 返回业务码 401（后端鉴权未放行），先在模拟器验收 UI；
-// 待后端放行 /app/** 后改回 false 即可直连
-export const USE_MOCK: boolean = true
+// 按需求「整套 app 都直连真服务器」，全量置 false（登录注册链路在 viewmodel/auth 已恒为直连）
+export const USE_MOCK: boolean = false
 
 // 兼容既有 LoginPage 的常量
 export const LoginUrl: string = BaseUrl + ApiPath.login
