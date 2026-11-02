@@ -1,13 +1,15 @@
-// 商城详情（M8b，自定义功能 C4）：价格 / 优惠 / 描述 / 收藏 + 产品评价
-import { COLORS, BG_GRADIENT } from '../common/style/Style'
-import { YqhGlassCard } from '../views/yqhGlassCard'
-import { YqhButton } from '../views/yqhButton'
+// 商城详情（M8b，自定义功能 C4，Dark Neumorphism）：价格 / 优惠 / 描述 / 收藏 + 产品评价
+import { neu, neuBg } from '../common/style/Style'
+import { YqhNeuCard } from '../common/ui/yqhNeuCard'
+import { YqhNeuButton } from '../common/ui/yqhNeuButton'
+import { YqhNeuChip } from '../common/ui/yqhNeuChip'
 import { getMallList, toggleFav } from '../viewmodel/mall'
 import { MallProduct, Review } from '../model/MallBean'
 
 @Component
 export struct YqhMallDetail {
   @Consume('navPathStack') navPathStack: NavPathStack
+  @StorageProp('darkMode') dark: boolean = true
   @Prop productId: string = ''
   @State item: MallProduct = new MallProduct()
   @State favOn: boolean = false // 收藏态单独成 @State，保证切换后即时刷新
@@ -54,53 +56,47 @@ export struct YqhMallDetail {
         Column({ space: 14 }) {
           if (this.loading) {
             LoadingProgress()
-              .width(28)
-              .height(28)
-              .color(COLORS.accent)
+              .width(32)
+              .height(32)
+              .color(neu(this.dark).accent)
           } else {
-            YqhGlassCard({ pad: 20 }) {
+            YqhNeuCard({ pad: 20 }) {
               Column({ space: 10 }) {
-                if (this.item.tag !== '') {
-                  Text(this.item.tag)
-                    .fontSize(11)
-                    .fontColor(COLORS.ink)
-                    .padding({ left: 8, right: 8, top: 2, bottom: 2 })
-                    .borderRadius(8)
-                    .backgroundColor(COLORS.highlight)
+                Row({ space: 8 }) {
+                  if (this.item.tag !== '') {
+                    YqhNeuChip({ text: this.item.tag, tone: 'accent' })
+                  }
+                  Blank()
                 }
+                .width('100%')
                 Text(this.item.name === '' ? '商品不存在' : this.item.name)
                   .fontSize(20)
                   .fontWeight(FontWeight.Bold)
-                  .fontColor(COLORS.ink)
+                  .fontColor(neu(this.dark).ink)
                   .width('100%')
                 Row({ space: 10 }) {
                   Text('¥' + this.item.price)
                     .fontSize(26)
                     .fontWeight(FontWeight.Bold)
-                    .fontColor(COLORS.accentDeep)
+                    .fontColor(neu(this.dark).accent)
                   Text('¥' + this.item.originalPrice)
                     .fontSize(14)
-                    .fontColor(COLORS.inkSub)
+                    .fontColor(neu(this.dark).inkSub)
                     .decoration({ type: TextDecorationType.LineThrough })
                   if (this.item.discount !== '') {
-                    Text(this.item.discount)
-                      .fontSize(12)
-                      .fontColor(COLORS.danger)
-                      .padding({ left: 8, right: 8, top: 2, bottom: 2 })
-                      .borderRadius(8)
-                      .backgroundColor('rgba(255,255,255,0.7)')
+                    YqhNeuChip({ text: this.item.discount, tone: 'danger' })
                   }
                 }
                 .width('100%')
                 Text('已售 ' + this.item.sales + ' 件')
                   .fontSize(12)
-                  .fontColor(COLORS.inkSub)
+                  .fontColor(neu(this.dark).inkSub)
                   .width('100%')
                 Text(this.item.desc)
                   .fontSize(14)
-                  .fontColor(COLORS.ink)
+                  .fontColor(neu(this.dark).ink)
                   .width('100%')
-                YqhButton({
+                YqhNeuButton({
                   text: this.favOn ? '已收藏 ♥' : '收藏商品 ♡',
                   primary: !this.favOn,
                   onBtnClick: () => {
@@ -111,38 +107,39 @@ export struct YqhMallDetail {
             }
 
             // 产品评价（C4 ④）
-            YqhGlassCard({ pad: 16 }) {
+            YqhNeuCard({ pad: 16 }) {
               Column({ space: 10 }) {
                 Text('产品评价（' + this.item.reviews.length + '）')
                   .fontSize(15)
                   .fontWeight(FontWeight.Bold)
-                  .fontColor(COLORS.ink)
+                  .fontColor(neu(this.dark).ink)
                   .width('100%')
                 ForEach(this.item.reviews, (r: Review) => {
                   Column({ space: 4 }) {
                     Row() {
                       Text(r.user)
                         .fontSize(12)
-                        .fontColor(COLORS.inkSub)
+                        .fontColor(neu(this.dark).inkSub)
                       Text(this.stars(r.rating))
                         .fontSize(12)
-                        .fontColor(COLORS.highlight)
+                        .fontColor(neu(this.dark).warn)
                     }
                     .width('100%')
                     .justifyContent(FlexAlign.SpaceBetween)
                     Text(r.content)
                       .fontSize(13)
-                      .fontColor(COLORS.ink)
+                      .fontColor(neu(this.dark).ink)
                       .width('100%')
                     Text(r.time)
                       .fontSize(11)
-                      .fontColor(COLORS.inkSub)
+                      .fontColor(neu(this.dark).inkSub)
                       .width('100%')
                   }
                   .width('100%')
-                  .padding(10)
-                  .borderRadius(10)
-                  .backgroundColor('rgba(255,255,255,0.55)')
+                  .padding(12)
+                  .borderRadius(16)
+                  .backgroundColor(neu(this.dark).surfaceSunken)
+                  .border({ width: 1, color: neu(this.dark).line })
                 }, (r: Review) => r.user + r.time)
               }
             }
@@ -156,6 +153,6 @@ export struct YqhMallDetail {
     }
     .width('100%')
     .height('100%')
-    .linearGradient(BG_GRADIENT)
+    .linearGradient(neuBg(this.dark))
   }
 }

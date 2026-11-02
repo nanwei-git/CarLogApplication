@@ -1,9 +1,10 @@
-// 车控（M6，接口 4.6/4.8）：图标按钮网格（新拟态圆形按钮）
-// 锁车/车灯/空调 + 前后左右移动（按住移动、松开停车）
-// 形态参考 Tesla 新拟态；配色沿用浅青白 / 青蓝
+// 车控（M6，接口 4.6/4.8）：开关网格 + 十字方向键（按住移动、松开停车）
+// 视觉：Dark Neumorphism —— 凸起圆键，按下凹陷 + 微缩，激活主色发光。
 import { promptAction } from '@kit.ArkUI'
-import { COLORS } from '../common/style/Style'
-import { YqhGlassCard } from '../views/yqhGlassCard'
+import { neu } from '../common/style/Style'
+import { YqhNeuCard } from '../common/ui/yqhNeuCard'
+import { YqhNeuCircleButton } from '../common/ui/yqhNeuCircleButton'
+import { YqhNeuChip } from '../common/ui/yqhNeuChip'
 import { getCarState, changeCarState, moveCar } from '../viewmodel/car'
 import { CarStat } from '../model/CarStateBean'
 import { CarStateChange } from '../model/ApiReq'
@@ -20,10 +21,9 @@ import {
   TOAST_MS
 } from '../common/constants/Constants'
 
-const NEU_BG: string = '#E9F2F4'
-
 @Component
 export struct YqhControl {
+  @StorageProp('darkMode') dark: boolean = true
   @State stat: CarStat = new CarStat()
   @State loading: boolean = true
   @State moving: string = ''
@@ -98,102 +98,130 @@ export struct YqhControl {
       })
   }
 
-  // 普通圆形开关按钮（锁车/车灯/空调）
-  @Builder
-  gridBtn(icon: string, label: string, active: boolean, onClick: () => void) {
-    Column({ space: 8 }) {
-      Button({ type: ButtonType.Circle }) {
-        Text(icon)
-          .fontSize(24)
-          .fontColor(active ? '#FFFFFF' : COLORS.ink)
-      }
-      .width(72)
-      .height(72)
-      .borderRadius(36)
-      .backgroundColor(active ? COLORS.accent : NEU_BG)
-      .shadow({ radius: 10, color: 'rgba(31,35,41,0.12)', offsetX: 4, offsetY: 4 })
-      .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
-      .onClick(onClick)
-      Text(label)
-        .fontSize(13)
-        .fontColor(COLORS.inkSub)
-    }
-  }
-
-  // 方向按钮（按住移动，松开停车）
-  @Builder
-  moveBtn(icon: string, label: string, direction: string) {
-    Column({ space: 8 }) {
-      Button({ type: ButtonType.Circle }) {
-        Text(icon)
-          .fontSize(24)
-          .fontColor(COLORS.ink)
-      }
-      .width(72)
-      .height(72)
-      .borderRadius(36)
-      .backgroundColor(NEU_BG)
-      .shadow({ radius: 10, color: 'rgba(31,35,41,0.12)', offsetX: 4, offsetY: 4 })
-      .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
-      .onTouch((e: TouchEvent) => {
-        if (e.type === TouchType.Down) {
-          this.doMove(direction, label)
-        } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
-          this.doMove(MOVE_STOP, '停')
-        }
-      })
-      Text(label)
-        .fontSize(13)
-        .fontColor(COLORS.inkSub)
-    }
-  }
-
   build() {
     Column({ space: 16 }) {
       if (this.loading) {
         LoadingProgress()
-          .width(28)
-          .height(28)
-          .color(COLORS.accent)
+          .width(32)
+          .height(32)
+          .color(neu(this.dark).accent)
         Text('正在获取车辆状态…')
           .fontSize(13)
-          .fontColor(COLORS.inkSub)
+          .fontColor(neu(this.dark).inkSub)
       } else {
-        Text('车辆控制')
-          .fontSize(20)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.ink)
-          .width('100%')
-          .textAlign(TextAlign.Center)
-
-        Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceAround, alignContent: FlexAlign.SpaceAround }) {
-          this.gridBtn('🔒', '锁车', this.isOn(this.stat.door), () => {
-            this.switchField('door', !this.isOn(this.stat.door))
+        Row() {
+          Text('车辆控制')
+            .fontSize(20)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(neu(this.dark).ink)
+          Blank()
+          YqhNeuChip({
+            text: this.moving === '' ? '静止' : '移动中',
+            tone: this.moving === '' ? '' : 'accent'
           })
-          this.gridBtn('💡', '车灯', this.isOn(this.stat.light), () => {
-            this.switchField('light', !this.isOn(this.stat.light))
-          })
-          this.gridBtn('❄', '空调', this.isOn(this.stat.acBtn), () => {
-            this.switchField('ac', !this.isOn(this.stat.acBtn))
-          })
-          this.moveBtn('⬆', '前进', MOVE_FRONT)
-          this.moveBtn('⬇', '后退', MOVE_BACK)
-          this.moveBtn('⬅', '左转', MOVE_LEFT)
-          this.moveBtn('➡', '右转', MOVE_RIGHT)
         }
         .width('100%')
-        .padding(8)
+        .padding({ left: 8, right: 8 })
 
-        YqhGlassCard({ pad: 16 }) {
+        // 车门 / 车灯 / 空调
+        YqhNeuCard({ pad: 18 }) {
+          Row({ space: 12 }) {
+            YqhNeuCircleButton({
+              icon: '🔒',
+              label: '车门',
+              diameter: 64,
+              active: this.isOn(this.stat.door),
+              onBtnClick: () => this.switchField('door', !this.isOn(this.stat.door))
+            })
+            YqhNeuCircleButton({
+              icon: '💡',
+              label: '车灯',
+              diameter: 64,
+              active: this.isOn(this.stat.light),
+              onBtnClick: () => this.switchField('light', !this.isOn(this.stat.light))
+            })
+            YqhNeuCircleButton({
+              icon: '❄',
+              label: '空调',
+              diameter: 64,
+              active: this.isOn(this.stat.acBtn),
+              onBtnClick: () => this.switchField('ac', !this.isOn(this.stat.acBtn))
+            })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceEvenly)
+        }
+
+        // 十字方向键：按住移动，松开停车
+        YqhNeuCard({ pad: 18 }) {
+          Column({ space: 12 }) {
+            YqhNeuCircleButton({
+              icon: '⬆',
+              diameter: 64,
+              onBtnTouch: (e: TouchEvent) => {
+                if (e.type === TouchType.Down) {
+                  this.doMove(MOVE_FRONT, '前')
+                } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
+                  this.doMove(MOVE_STOP, '停')
+                }
+              }
+            })
+            Row({ space: 12 }) {
+              YqhNeuCircleButton({
+                icon: '⬅',
+                diameter: 64,
+                onBtnTouch: (e: TouchEvent) => {
+                  if (e.type === TouchType.Down) {
+                    this.doMove(MOVE_LEFT, '左')
+                  } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
+                    this.doMove(MOVE_STOP, '停')
+                  }
+                }
+              })
+              YqhNeuCircleButton({
+                icon: '⏹',
+                diameter: 64,
+                onBtnClick: () => this.doMove(MOVE_STOP, '停')
+              })
+              YqhNeuCircleButton({
+                icon: '➡',
+                diameter: 64,
+                onBtnTouch: (e: TouchEvent) => {
+                  if (e.type === TouchType.Down) {
+                    this.doMove(MOVE_RIGHT, '右')
+                  } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
+                    this.doMove(MOVE_STOP, '停')
+                  }
+                }
+              })
+            }
+            YqhNeuCircleButton({
+              icon: '⬇',
+              diameter: 64,
+              onBtnTouch: (e: TouchEvent) => {
+                if (e.type === TouchType.Down) {
+                  this.doMove(MOVE_BACK, '后')
+                } else if (e.type === TouchType.Up || e.type === TouchType.Cancel) {
+                  this.doMove(MOVE_STOP, '停')
+                }
+              }
+            })
+          }
+          .width('100%')
+        }
+
+        // 状态回显
+        YqhNeuCard({ pad: 16, sunken: true }) {
           Column({ space: 6 }) {
             Text(this.moving === '' ? '当前状态：静止' : '当前状态：' + this.moving)
-              .fontSize(13)
-              .fontColor(COLORS.accentDeep)
+              .fontSize(14)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.moving === '' ? neu(this.dark).ink : neu(this.dark).accent)
               .width('100%')
               .textAlign(TextAlign.Center)
             Text('按住方向键移动，松开即停车')
               .fontSize(12)
-              .fontColor(COLORS.inkSub)
+              .fontColor(neu(this.dark).inkSub)
               .width('100%')
               .textAlign(TextAlign.Center)
           }
@@ -201,6 +229,6 @@ export struct YqhControl {
       }
     }
     .width('100%')
-    .padding(16)
+    .padding({ left: 16, right: 16, top: 16, bottom: 24 })
   }
 }

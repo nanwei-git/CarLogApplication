@@ -1,7 +1,7 @@
-// 车辆操作日志「信息」页（原型同名页，UI 沿用本项目玻璃拟态风格）
+// 车辆操作日志「信息」页（Dark Neumorphism）
 import { promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../common/style/Style'
-import { YqhGlassCard } from '../views/yqhGlassCard'
+import { neu, neuBg } from '../common/style/Style'
+import { YqhNeuCard } from '../common/ui/yqhNeuCard'
 import { getCarLogs } from '../viewmodel/car'
 import { OperationLog } from '../model/CarLogBean'
 import { TOAST_MS } from '../common/constants/Constants'
@@ -9,6 +9,7 @@ import { TOAST_MS } from '../common/constants/Constants'
 @Component
 export struct YqhLog {
   @Consume('navPathStack') navPathStack: NavPathStack
+  @StorageProp('darkMode') dark: boolean = true
   @State list: OperationLog[] = []
   @State loading: boolean = true
 
@@ -34,33 +35,33 @@ export struct YqhLog {
       Column({ space: 12 }) {
         if (this.loading) {
           LoadingProgress()
-            .width(28)
-            .height(28)
-            .color(COLORS.accent)
+            .width(32)
+            .height(32)
+            .color(neu(this.dark).accent)
         } else if (this.list.length === 0) {
           Text('暂无操作日志')
             .fontSize(14)
-            .fontColor(COLORS.inkSub)
+            .fontColor(neu(this.dark).inkSub)
         } else {
-          List({ space: 10 }) {
+          List({ space: 12 }) {
             ForEach(this.list, (log: OperationLog) => {
               ListItem() {
-                YqhGlassCard({ pad: 16 }) {
+                YqhNeuCard({ pad: 16 }) {
                   Column({ space: 6 }) {
                     Row() {
                       Text(log.title)
                         .fontSize(15)
                         .fontWeight(FontWeight.Bold)
-                        .fontColor(COLORS.ink)
+                        .fontColor(neu(this.dark).ink)
                       Text(log.time)
                         .fontSize(11)
-                        .fontColor(COLORS.inkSub)
+                        .fontColor(neu(this.dark).inkSub)
                     }
                     .width('100%')
                     .justifyContent(FlexAlign.SpaceBetween)
                     Text(log.desc)
                       .fontSize(13)
-                      .fontColor(COLORS.inkSub)
+                      .fontColor(neu(this.dark).inkSub)
                       .width('100%')
                   }
                 }
@@ -77,6 +78,6 @@ export struct YqhLog {
     }
     .width('100%')
     .height('100%')
-    .linearGradient(BG_GRADIENT)
+    .linearGradient(neuBg(this.dark))
   }
 }

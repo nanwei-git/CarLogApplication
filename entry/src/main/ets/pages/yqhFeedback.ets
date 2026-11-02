@@ -1,17 +1,20 @@
 // 反馈列表（M7，接口 4.9.1/4.9.4）：下拉刷新 + 上拉加载 + 左滑删除（二次确认）
 // 由 yqhIndex 的"反馈" TabContent 组装；列表→详情走 NavDestination（C5）
-// 原型对齐：标题「反馈列表」+ 右上圆形「+」；卡片 时间(灰)/内容(黑两行)/分隔线/查看详情 ›
+// 视觉：Dark Neumorphism —— 拟态卡片 + 拟态圆形「+」
 import { promptAction } from '@kit.ArkUI'
-import { COLORS } from '../common/style/Style'
-import { YqhGlassCard } from '../views/yqhGlassCard'
+import { neu } from '../common/style/Style'
+import { YqhNeuCard } from '../common/ui/yqhNeuCard'
+import { YqhNeuCircleButton } from '../common/ui/yqhNeuCircleButton'
+import { YqhNeuChip } from '../common/ui/yqhNeuChip'
 import { getFeedbackList, deleteFeedback } from '../viewmodel/feedback'
 import { Feedback, FeedBackListBean } from '../model/FeedBackBean'
 import { IResult } from '../model/IResult'
-import { PAGE_START, LOG_PAGE_SIZE, TOAST_MS, FEEDBACK_UNREAD } from '../common/constants/Constants'
+import { PAGE_START, LOG_PAGE_SIZE, TOAST_MS, FEEDBACK_READ } from '../common/constants/Constants'
 
 @Component
 export struct YqhFeedback {
   @Consume('navPathStack') navPathStack: NavPathStack
+  @StorageProp('darkMode') dark: boolean = true
   @StorageLink('feedbackDirty') @Watch('onDirty') dirty: boolean = false
   @State list: Feedback[] = []
   @State refreshing: boolean = false
@@ -98,7 +101,7 @@ export struct YqhFeedback {
     }
     .width(72)
     .height('100%')
-    .backgroundColor(COLORS.danger)
+    .backgroundColor(neu(this.dark).danger)
     .justifyContent(FlexAlign.Center)
     .onClick(() => {
       AlertDialog.show({
@@ -108,13 +111,13 @@ export struct YqhFeedback {
         alignment: DialogAlignment.Center,
         primaryButton: {
           value: '取消',
-          fontColor: COLORS.inkSub,
+          fontColor: neu(this.dark).inkSub,
           action: () => {
           }
         },
         secondaryButton: {
           value: '删除',
-          fontColor: COLORS.danger,
+          fontColor: neu(this.dark).danger,
           action: () => {
             this.doDelete(item)
           }
@@ -125,29 +128,36 @@ export struct YqhFeedback {
 
   @Builder
   feedbackItem(item: Feedback) {
-    YqhGlassCard({ pad: 16 }) {
-      Column({ space: 8 }) {
-        Text(item.createTime)
-          .fontSize(12)
-          .fontColor(COLORS.inkSub)
+    YqhNeuCard({ pad: 16 }) {
+      Column({ space: 10 }) {
+        Row() {
+          Text(item.createTime)
+            .fontSize(12)
+            .fontColor(neu(this.dark).inkSub)
+          Blank()
+          YqhNeuChip({
+            text: item.status === FEEDBACK_READ ? '已读' : '未读',
+            tone: item.status === FEEDBACK_READ ? 'ok' : 'warn'
+          })
+        }
+        .width('100%')
+
         Text(item.content)
           .fontSize(15)
-          .fontColor(COLORS.ink)
+          .fontColor(neu(this.dark).ink)
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
-        Divider()
-          .color(COLORS.line)
-          .width('100%')
+
         Row() {
           Blank()
           Row({ space: 4 }) {
             Text('查看详情')
               .fontSize(13)
-              .fontColor(COLORS.accent)
+              .fontColor(neu(this.dark).accent)
             Text('›')
               .fontSize(16)
-              .fontColor(COLORS.inkSub)
+              .fontColor(neu(this.dark).inkSub)
           }
         }
         .width('100%')
@@ -161,36 +171,32 @@ export struct YqhFeedback {
         Text('反馈列表')
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.ink)
-        Button('+')
-          .width(40)
-          .height(40)
-          .borderRadius(20)
-          .fontSize(26)
-          .fontColor(COLORS.accent)
-          .backgroundColor(COLORS.card)
-          .border({ width: 1, color: COLORS.line })
-          .onClick(() => {
+          .fontColor(neu(this.dark).ink)
+        Blank()
+        YqhNeuCircleButton({
+          icon: '+',
+          diameter: 44,
+          onBtnClick: () => {
             this.navPathStack.pushPath({ name: 'FeedbackAdd' })
-          })
+          }
+        })
       }
       .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
       .padding({ left: 16, right: 16, top: 8 })
 
       if (this.loading) {
         LoadingProgress()
-          .width(28)
-          .height(28)
-          .color(COLORS.accent)
+          .width(32)
+          .height(32)
+          .color(neu(this.dark).accent)
       } else if (this.list.length === 0) {
         Text('暂无反馈，点击右上角"+"提交')
           .fontSize(13)
-          .fontColor(COLORS.inkSub)
+          .fontColor(neu(this.dark).inkSub)
           .padding(24)
       } else {
         Refresh({ refreshing: $$this.refreshing }) {
-          List({ space: 10 }) {
+          List({ space: 12 }) {
             ForEach(this.list, (item: Feedback) => {
               ListItem() {
                 this.feedbackItem(item)
@@ -210,7 +216,7 @@ export struct YqhFeedback {
                 Row() {
                   Text(this.loadingMore ? '加载中…' : '上拉加载更多')
                     .fontSize(12)
-                    .fontColor(COLORS.inkSub)
+                    .fontColor(neu(this.dark).inkSub)
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Center)

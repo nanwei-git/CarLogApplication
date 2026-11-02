@@ -1,8 +1,10 @@
-// 注册页（M2）：两次密码一致校验、必填校验、调用 getRegister（账号已存在由服务器 msg 提示）
+// 注册页（M2，Dark Neumorphism）：凹陷输入框 + 拟态卡片 + 主色发光按钮
+// 逻辑不变：两次密码一致校验、必填校验、调用 getRegister（账号已存在由服务器 msg 提示）
 import { router, promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../common/style/Style'
-import { YqhGlassCard } from '../views/yqhGlassCard'
-import { YqhButton } from '../views/yqhButton'
+import { neu, neuBg } from '../common/style/Style'
+import { YqhNeuCard } from '../common/ui/yqhNeuCard'
+import { YqhNeuRing } from '../common/ui/yqhNeuRing'
+import { YqhNeuButton } from '../common/ui/yqhNeuButton'
 import { getRegister } from '../viewmodel/auth'
 import { IResult } from '../model/IResult'
 import { RegisterReq } from '../model/ApiReq'
@@ -10,20 +12,11 @@ import { RegisterReq } from '../model/ApiReq'
 @Entry
 @Component
 struct YqhRegister {
+  @StorageProp('darkMode') dark: boolean = true
   @State username: string = ''
   @State password: string = ''
   @State confirm: string = ''
   @State agree: boolean = false
-
-  @Styles
-  inputStyle() {
-    .width('100%')
-    .height(48)
-    .borderRadius(24)
-    .border({ width: 1, color: COLORS.line })
-    .backgroundColor(COLORS.card)
-    .padding({ left: 16, right: 16 })
-  }
 
   private doRegister(): void {
     if (this.username === '' || this.password === '' || this.confirm === '') {
@@ -65,84 +58,103 @@ struct YqhRegister {
       })
   }
 
+  // 凹陷式输入框（新拟态：内嵌感）
+  @Builder
+  inputRow(placeholder: string, value: string, isPassword: boolean, onChange: (v: string) => void) {
+    TextInput({ placeholder: placeholder, text: value })
+      .width('100%')
+      .height(50)
+      .borderRadius(25)
+      .padding({ left: 18, right: 18 })
+      .backgroundColor(neu(this.dark).surfaceSunken)
+      .fontColor(neu(this.dark).ink)
+      .placeholderColor(neu(this.dark).inkSub)
+      .caretColor(neu(this.dark).accent)
+      .fontSize(15)
+      .border({ width: 1, color: neu(this.dark).line })
+      .type(isPassword ? InputType.Password : InputType.Normal)
+      .onChange(onChange)
+  }
+
   build() {
     Stack() {
-      Column() {
-        // 顶部标题（左对齐）
-        Column({ space: 6 }) {
-          Text('注册账号')
-            .fontSize(28)
-            .fontWeight(FontWeight.Bold)
-            .fontColor(COLORS.ink)
-          Text('创建您的车主账号')
-            .fontSize(15)
-            .fontColor(COLORS.inkSub)
-        }
-        .alignItems(HorizontalAlign.Start)
-        .width('100%')
-        .margin({ top: 48, bottom: 28 })
+      Scroll() {
+        Column({ space: 18 }) {
+          Column() {
+            YqhNeuRing({ value: 100, diameter: 92, stroke: 6 }) {
+              Text('🚗')
+                .fontSize(36)
+            }
+          }
+          .margin({ top: 40 })
 
-        YqhGlassCard({ pad: 20 }) {
-          Column({ space: 14 }) {
-            TextInput({ placeholder: '请输入用户名', text: this.username })
-              .inputStyle()
-              .onChange((v: string) => {
+          Column({ space: 6 }) {
+            Text('注册账号')
+              .fontSize(26)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(neu(this.dark).ink)
+            Text('创建您的车主账号')
+              .fontSize(14)
+              .fontColor(neu(this.dark).inkSub)
+          }
+          .alignItems(HorizontalAlign.Start)
+          .width('100%')
+
+          YqhNeuCard({ pad: 20 }) {
+            Column({ space: 14 }) {
+              this.inputRow('请输入用户名', this.username, false, (v: string) => {
                 this.username = v
               })
-            TextInput({ placeholder: '请输入密码', text: this.password })
-              .inputStyle()
-              .type(InputType.Password)
-              .onChange((v: string) => {
+              this.inputRow('请输入密码', this.password, true, (v: string) => {
                 this.password = v
               })
-            TextInput({ placeholder: '请再次输入密码', text: this.confirm })
-              .inputStyle()
-              .type(InputType.Password)
-              .onChange((v: string) => {
+              this.inputRow('请再次输入密码', this.confirm, true, (v: string) => {
                 this.confirm = v
               })
 
-            YqhButton({ text: '注册', onBtnClick: () => this.doRegister() })
+              YqhNeuButton({ text: '注册', onBtnClick: () => this.doRegister() })
 
-            Row() {
-              Text('已有账号？')
-                .fontColor(COLORS.inkSub)
-                .fontSize(14)
-              Text('登录')
-                .fontColor(COLORS.accent)
-                .fontSize(14)
-                .fontWeight(FontWeight.Medium)
-                .onClick(() => {
-                  router.replaceUrl({ url: 'pages/yqhLogin' })
-                })
-            }
-            .justifyContent(FlexAlign.Center)
-            .width('100%')
+              Row() {
+                Text('已有账号？')
+                  .fontColor(neu(this.dark).inkSub)
+                  .fontSize(14)
+                Text('登录')
+                  .fontColor(neu(this.dark).accent)
+                  .fontSize(14)
+                  .fontWeight(FontWeight.Medium)
+                  .onClick(() => {
+                    router.replaceUrl({ url: 'pages/yqhLogin' })
+                  })
+              }
+              .justifyContent(FlexAlign.Center)
+              .width('100%')
 
-            Row({ space: 6 }) {
-              Checkbox()
-                .select(this.agree)
-                .width(16)
-                .height(16)
-                .onChange((v: boolean) => {
-                  this.agree = v
-                })
-              Text('我已阅读并同意《用户协议》《隐私政策》')
-                .fontSize(12)
-                .fontColor(COLORS.inkSub)
+              Row({ space: 8 }) {
+                Checkbox()
+                  .select(this.agree)
+                  .selectedColor(neu(this.dark).accent)
+                  .width(18)
+                  .height(18)
+                  .onChange((v: boolean) => {
+                    this.agree = v
+                  })
+                Text('我已阅读并同意《用户协议》《隐私政策》')
+                  .fontSize(12)
+                  .fontColor(neu(this.dark).inkSub)
+              }
+              .width('100%')
+              .margin({ top: 4 })
             }
-            .width('100%')
-            .margin({ top: 4 })
           }
         }
+        .width('100%')
+        .padding({ left: 24, right: 24, bottom: 40 })
       }
       .width('100%')
       .height('100%')
-      .padding(24)
-      .alignItems(HorizontalAlign.Start)
     }
     .width('100%')
     .height('100%')
-    .linearGradient(BG_GRADIENT)
+    .linearGradient(neuBg(this.dark))
   }
 }

@@ -1,9 +1,11 @@
-// 绑车/换绑页（M3）：VIN 格式校验 → bindCarByVin → 存 carVin → 回首页（C3：carVin 单判）
+// 绑车/换绑页（M3，Dark Neumorphism）：凹陷 VIN 输入框 + 拟态卡片
+// 逻辑不变：VIN 格式校验 → bindCarByVin → 存 carVin → 回首页（C3：carVin 单判）
 // 入口①：登录后无 carVin 强制进此页；入口②：我的页"换绑车辆"（from=mine，绑定后 back）
 import { router, promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../common/style/Style'
-import { YqhGlassCard } from '../views/yqhGlassCard'
-import { YqhButton } from '../views/yqhButton'
+import { neu, neuBg } from '../common/style/Style'
+import { YqhNeuCard } from '../common/ui/yqhNeuCard'
+import { YqhNeuRing } from '../common/ui/yqhNeuRing'
+import { YqhNeuButton } from '../common/ui/yqhNeuButton'
 import { bindCarByVin } from '../viewmodel/auth'
 import { setCarVin, getCarVin, clearSession } from '../common/utils/StorageUtils'
 import { IResult } from '../model/IResult'
@@ -12,6 +14,7 @@ import { VIN_PATTERN, VIN_MIN_LEN, VIN_MAX_LEN, TOAST_MS } from '../common/const
 @Entry
 @Component
 struct YqhBindCar {
+  @StorageProp('darkMode') dark: boolean = true
   @State vin: string = ''
   @State fromMine: boolean = false // 我的页换绑入口：绑完直接 back
 
@@ -73,33 +76,46 @@ struct YqhBindCar {
 
   build() {
     Stack() {
-      Column() {
-        YqhGlassCard({ pad: 24 }) {
+      Column({ space: 18 }) {
+        YqhNeuRing({ value: 100, diameter: 100, stroke: 6 }) {
+          Text('🚙')
+            .fontSize(40)
+        }
+
+        YqhNeuCard({ pad: 24 }) {
           Column({ space: 16 }) {
             Text(this.fromMine ? '换绑车辆' : '绑定车辆')
               .fontSize(24)
               .fontWeight(FontWeight.Bold)
-              .fontColor(COLORS.ink)
+              .fontColor(neu(this.dark).ink)
             Text(this.fromMine ? '输入新的车架号以更换绑定车辆' : '首次使用请先绑定车辆，未绑定无法使用车控功能')
               .fontSize(13)
-              .fontColor(COLORS.inkSub)
+              .fontColor(neu(this.dark).inkSub)
+              .width('100%')
             TextInput({ placeholder: '请输入车辆 VIN', text: this.vin })
               .width('100%')
-              .height(44)
-              .backgroundColor(COLORS.card)
-              .borderRadius(10)
+              .height(50)
+              .borderRadius(25)
+              .padding({ left: 18, right: 18 })
+              .backgroundColor(neu(this.dark).surfaceSunken)
+              .fontColor(neu(this.dark).ink)
+              .placeholderColor(neu(this.dark).inkSub)
+              .caretColor(neu(this.dark).accent)
+              .fontSize(15)
+              .border({ width: 1, color: neu(this.dark).line })
               .onChange((v: string) => {
                 this.vin = v
               })
             Text('VIN 为 4-17 位字母/数字/短横线，台架调试请用 4494356c')
               .fontSize(12)
-              .fontColor(COLORS.inkSub)
-            YqhButton({
+              .fontColor(neu(this.dark).inkSub)
+              .width('100%')
+            YqhNeuButton({
               text: '确认绑定',
               primary: true,
               onBtnClick: () => this.doBind()
             })
-            YqhButton({
+            YqhNeuButton({
               text: '退出登录',
               primary: false,
               onBtnClick: () => {
@@ -117,6 +133,6 @@ struct YqhBindCar {
     }
     .width('100%')
     .height('100%')
-    .linearGradient(BG_GRADIENT)
+    .linearGradient(neuBg(this.dark))
   }
 }

@@ -1,10 +1,13 @@
-// 欢迎页（M1）：纯黑底 + bg_start 发光车 + 一行标语；3s 后按登录态分流。
+// 欢迎页（M1，Dark Neumorphism）：暗底 + 拟态品牌环 + 标语；3s 后按登录态分流。
 import { router } from '@kit.ArkUI'
+import { neu, neuBg } from '../common/style/Style'
+import { YqhNeuRing } from '../common/ui/yqhNeuRing'
 import { getIsLogin } from '../common/utils/StorageUtils'
 
 @Entry
 @Component
 struct YqhWelcome {
+  @StorageProp('darkMode') dark: boolean = true
   private timer: number = -1
 
   aboutToAppear(): void {
@@ -27,26 +30,32 @@ struct YqhWelcome {
 
   build() {
     Stack() {
-      // 发光车底图（纯黑背景承托）
+      // 车辆底图（暗底承托，降低透明度避免抢视觉）
       Image($r('app.media.bg_start'))
         .width('100%')
         .height('100%')
         .objectFit(ImageFit.Cover)
-      // 底部标语
-      Column() {
-        Text('轻松驾驭·快乐出行')
-          .fontSize(20)
-          .fontWeight(FontWeight.Medium)
-          .fontColor('#FFFFFF')
-          .shadow({ radius: 6, color: '#000000', offsetX: 0, offsetY: 1 })
+        .opacity(0.5)
+
+      Column({ space: 28 }) {
+        // 拟态品牌环
+        YqhNeuRing({ value: 100, diameter: 168, stroke: 8 }) {
+          Text('🚗')
+            .fontSize(66)
+        }
+        Column({ space: 6 }) {
+          Text('轻松驾驭·快乐出行')
+            .fontSize(20)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(neu(this.dark).ink)
+          Text('杨庆鸿的车主App')
+            .fontSize(12)
+            .fontColor(neu(this.dark).inkSub)
+        }
       }
-      .width('100%')
-      .height('100%')
-      .justifyContent(FlexAlign.End)
-      .padding({ bottom: 90 })
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#000000')
+    .linearGradient(neuBg(this.dark))
   }
 }

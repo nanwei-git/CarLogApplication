@@ -1,9 +1,11 @@
-// 首页车辆信息卡（M4，接口 4.5/4.6）：大圆形续航表盘（电量环）+ 快捷控制网格
-// 形态参考 Tesla 新拟态；配色沿用浅青白底 / 纯白卡 / 青蓝主色
+// 首页车辆信息卡（M4，接口 4.5/4.6）：环形电量表盘 + 快捷控制（Dark Neumorphism）
 import { promptAction } from '@kit.ArkUI'
-import { COLORS } from '../../common/style/Style'
-import { YqhGlassCard } from '../yqhGlassCard'
-import { YqhButton } from '../yqhButton'
+import { neu } from '../../common/style/Style'
+import { YqhNeuCard } from '../../common/ui/yqhNeuCard'
+import { YqhNeuRing } from '../../common/ui/yqhNeuRing'
+import { YqhNeuCircleButton } from '../../common/ui/yqhNeuCircleButton'
+import { YqhNeuButton } from '../../common/ui/yqhNeuButton'
+import { YqhNeuChip } from '../../common/ui/yqhNeuChip'
 import { getCarInfo, getCarState, changeCarState } from '../../viewmodel/car'
 import { CarInfoBean } from '../../model/CarInfoBean'
 import { CarStat } from '../../model/CarStateBean'
@@ -12,11 +14,9 @@ import { IResult } from '../../model/IResult'
 import { getCarVin } from '../../common/utils/StorageUtils'
 import { SWITCH_ON, SWITCH_OFF, TOAST_MS } from '../../common/constants/Constants'
 
-// 新拟态圆形按钮底色（略深于背景，便于投影出"浮起"质感）
-const NEU_BG: string = '#E9F2F4'
-
 @Component
 export struct YqhCarInfoComp {
+  @StorageProp('darkMode') dark: boolean = true
   @State info: CarInfoBean = new CarInfoBean()
   @State stat: CarStat = new CarStat()
   @State loading: boolean = true
@@ -59,6 +59,18 @@ export struct YqhCarInfoComp {
     return p
   }
 
+  // 电量环配色：充足绿 / 中等黄 / 低电红
+  private batteryColor(): string {
+    const p: number = this.percent()
+    if (p >= 50) {
+      return neu(this.dark).ok
+    }
+    if (p >= 20) {
+      return neu(this.dark).warn
+    }
+    return neu(this.dark).danger
+  }
+
   // 快捷开关：只传变更字段，成功后回写刷新
   private toggle(field: string, on: boolean): void {
     if (this.busy) {
@@ -88,154 +100,106 @@ export struct YqhCarInfoComp {
       })
   }
 
-  // 续航大圆形表盘（电量进度环 + 中心续航）
-  @Builder
-  rangeDial() {
-    Stack({ alignContent: Alignment.Center }) {
-      Progress({ value: this.percent(), total: 100, type: ProgressType.Ring })
-        .width(190)
-        .height(190)
-        .style({ strokeWidth: 14 })
-        .color(COLORS.accent)
-      Column({ space: 2 }) {
-        Text(this.info.enduranceMileage === '' ? '--' : this.info.enduranceMileage)
-          .fontSize(44)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.ink)
-        Text('可续航 km')
-          .fontSize(13)
-          .fontColor(COLORS.inkSub)
-        Text(this.percent() + '% 电量')
-          .fontSize(12)
-          .fontColor(COLORS.accentDeep)
-          .margin({ top: 6 })
-      }
-    }
-    .width(190)
-    .height(190)
-  }
-
-  // 快捷控制网格：锁车 / 车灯 / 空调
-  @Builder
-  quickGrid() {
-    Row({ space: 16 }) {
-      Column({ space: 6 }) {
-        Button({ type: ButtonType.Circle }) {
-          Image($r('app.media.ic_door_lock'))
-            .width(26)
-            .height(26)
-        }
-        .width(56)
-        .height(56)
-        .borderRadius(28)
-        .backgroundColor(this.isOn(this.stat.door) ? COLORS.highlight : NEU_BG)
-        .shadow({ radius: 8, color: 'rgba(31,35,41,0.12)', offsetX: 3, offsetY: 3 })
-        .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
-        .onClick(() => {
-          this.toggle('door', !this.isOn(this.stat.door))
-        })
-        Text('锁车')
-          .fontSize(12)
-          .fontColor(COLORS.inkSub)
-      }
-      Column({ space: 6 }) {
-        Button({ type: ButtonType.Circle }) {
-          Image($r('app.media.ic_light_open'))
-            .width(26)
-            .height(26)
-        }
-        .width(56)
-        .height(56)
-        .borderRadius(28)
-        .backgroundColor(this.isOn(this.stat.light) ? COLORS.highlight : NEU_BG)
-        .shadow({ radius: 8, color: 'rgba(31,35,41,0.12)', offsetX: 3, offsetY: 3 })
-        .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
-        .onClick(() => {
-          this.toggle('light', !this.isOn(this.stat.light))
-        })
-        Text('车灯')
-          .fontSize(12)
-          .fontColor(COLORS.inkSub)
-      }
-      Column({ space: 6 }) {
-        Button({ type: ButtonType.Circle }) {
-          Text('❄')
-            .fontSize(24)
-            .fontColor(this.isOn(this.stat.acBtn) ? COLORS.accentDeep : COLORS.ink)
-        }
-        .width(56)
-        .height(56)
-        .borderRadius(28)
-        .backgroundColor(this.isOn(this.stat.acBtn) ? COLORS.highlight : NEU_BG)
-        .shadow({ radius: 8, color: 'rgba(31,35,41,0.12)', offsetX: 3, offsetY: 3 })
-        .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
-        .onClick(() => {
-          this.toggle('ac', !this.isOn(this.stat.acBtn))
-        })
-        Text('空调')
-          .fontSize(12)
-          .fontColor(COLORS.inkSub)
-      }
-    }
-    .width('100%')
-    .justifyContent(FlexAlign.SpaceAround)
-  }
-
   build() {
-    Column({ space: 12 }) {
+    Column({ space: 14 }) {
       if (this.loading) {
         LoadingProgress()
-          .width(28)
-          .height(28)
-          .color(COLORS.accent)
+          .width(32)
+          .height(32)
+          .color(neu(this.dark).accent)
         Text('正在获取车辆状态…')
           .fontSize(13)
-          .fontColor(COLORS.inkSub)
+          .fontColor(neu(this.dark).inkSub)
       } else {
-        YqhGlassCard({ pad: 20 }) {
-          Column({ space: 16 }) {
+        YqhNeuCard({ pad: 20 }) {
+          Column({ space: 18 }) {
+            // 1、车辆身份
             Row() {
-              Column({ space: 2 }) {
+              Column({ space: 4 }) {
                 Text(this.info.carName === '' ? '未绑定车辆' : this.info.carName)
                   .fontSize(18)
                   .fontWeight(FontWeight.Bold)
-                  .fontColor(COLORS.ink)
+                  .fontColor(neu(this.dark).ink)
                 Text(
                   (this.info.brand === '' ? '未知品牌' : this.info.brand) +
                   ' · VIN ' + getCarVin()
                 )
                   .fontSize(12)
-                  .fontColor(COLORS.inkSub)
+                  .fontColor(neu(this.dark).inkSub)
               }
               .alignItems(HorizontalAlign.Start)
-              Blank()
+              .layoutWeight(1)
+              YqhNeuChip({ text: '在线', tone: 'ok' })
             }
             .width('100%')
 
-            Row() {
-              this.rangeDial()
+            // 2、环形电量表盘
+            YqhNeuRing({
+              value: this.percent(),
+              diameter: 190,
+              stroke: 14,
+              ringColor: this.batteryColor()
+            }) {
+              Column({ space: 2 }) {
+                Text(this.info.enduranceMileage === '' ? '--' : this.info.enduranceMileage)
+                  .fontSize(42)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(neu(this.dark).ink)
+                Text('km 可续航')
+                  .fontSize(12)
+                  .fontColor(neu(this.dark).inkSub)
+                Text(this.percent() + '%')
+                  .fontSize(16)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(this.batteryColor())
+                  .margin({ top: 6 })
+              }
+            }
+
+            // 3、快捷控制：车门 / 车灯 / 空调
+            Row({ space: 12 }) {
+              YqhNeuCircleButton({
+                imageSrc: $r('app.media.ic_door_lock'),
+                label: '车门',
+                diameter: 64,
+                active: this.isOn(this.stat.door),
+                onBtnClick: () => this.toggle('door', !this.isOn(this.stat.door))
+              })
+              YqhNeuCircleButton({
+                imageSrc: $r('app.media.ic_light_open'),
+                label: '车灯',
+                diameter: 64,
+                active: this.isOn(this.stat.light),
+                onBtnClick: () => this.toggle('light', !this.isOn(this.stat.light))
+              })
+              YqhNeuCircleButton({
+                icon: '❄',
+                label: '空调',
+                diameter: 64,
+                active: this.isOn(this.stat.acBtn),
+                onBtnClick: () => this.toggle('ac', !this.isOn(this.stat.acBtn))
+              })
             }
             .width('100%')
-            .justifyContent(FlexAlign.Center)
+            .justifyContent(FlexAlign.SpaceEvenly)
 
-            this.quickGrid()
-
+            // 4、更新时间
             Text('更新于 ' + (this.info.createYm === '' ? '--' : this.info.createYm))
-              .fontSize(12)
-              .fontColor(COLORS.inkSub)
+              .fontSize(11)
+              .fontColor(neu(this.dark).inkSub)
               .width('100%')
               .textAlign(TextAlign.Center)
           }
         }
-        YqhButton({
-          text: '刷新',
+        YqhNeuButton({
+          text: '刷新状态',
           primary: false,
-          btnHeight: 36,
+          btnHeight: 44,
           onBtnClick: () => this.load()
         })
       }
     }
     .width('100%')
-    .padding(16)
+    .padding({ left: 16, right: 16, top: 8, bottom: 8 })
   }
 }

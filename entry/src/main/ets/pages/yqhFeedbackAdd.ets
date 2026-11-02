@@ -1,9 +1,9 @@
 // 新增反馈（M7，接口 4.9.2）：≤100 字校验，提交成功后置脏标记并回列表
-// 原型对齐：标题「反馈建议」+ 白卡 TextArea（占位 请输入您的反馈建议（100字以内））+ 底部胶囊「提交」+ toast「意见反馈成功」
+// 视觉：Dark Neumorphism —— 凹陷输入区 + 拟态卡片 + 主色发光按钮
 import { promptAction } from '@kit.ArkUI'
-import { COLORS, BG_GRADIENT } from '../common/style/Style'
-import { YqhGlassCard } from '../views/yqhGlassCard'
-import { YqhButton } from '../views/yqhButton'
+import { neu, neuBg } from '../common/style/Style'
+import { YqhNeuCard } from '../common/ui/yqhNeuCard'
+import { YqhNeuButton } from '../common/ui/yqhNeuButton'
 import { addFeedback } from '../viewmodel/feedback'
 import { IResult } from '../model/IResult'
 import { FEEDBACK_MAX, TOAST_MS } from '../common/constants/Constants'
@@ -11,6 +11,7 @@ import { FEEDBACK_MAX, TOAST_MS } from '../common/constants/Constants'
 @Component
 export struct YqhFeedbackAdd {
   @Consume('navPathStack') navPathStack: NavPathStack
+  @StorageProp('darkMode') dark: boolean = true
   @State content: string = ''
   @State submitting: boolean = false
 
@@ -52,18 +53,23 @@ export struct YqhFeedbackAdd {
         Text('反馈建议')
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.ink)
+          .fontColor(neu(this.dark).ink)
           .width('100%')
           .padding({ left: 16, bottom: 12 })
         Scroll() {
           Column({ space: 16 }) {
-            YqhGlassCard({ pad: 16 }) {
+            YqhNeuCard({ pad: 16 }) {
               Column({ space: 10 }) {
                 TextArea({ placeholder: '请输入您的反馈建议（100字以内）', text: this.content })
                   .width('100%')
                   .height(160)
-                  .backgroundColor('#F5F6F8')
-                  .borderRadius(12)
+                  .backgroundColor(neu(this.dark).surfaceSunken)
+                  .fontColor(neu(this.dark).ink)
+                  .placeholderColor(neu(this.dark).inkSub)
+                  .caretColor(neu(this.dark).accent)
+                  .fontSize(15)
+                  .borderRadius(16)
+                  .padding(12)
                   .maxLength(FEEDBACK_MAX)
                   .onChange((v: string) => {
                     this.content = v
@@ -72,12 +78,14 @@ export struct YqhFeedbackAdd {
                   Blank()
                   Text(this.content.length + '/' + FEEDBACK_MAX)
                     .fontSize(12)
-                    .fontColor(this.content.length > FEEDBACK_MAX ? COLORS.danger : COLORS.inkSub)
+                    .fontColor(this.content.length > FEEDBACK_MAX
+                      ? neu(this.dark).danger
+                      : neu(this.dark).inkSub)
                 }
                 .width('100%')
               }
             }
-            YqhButton({
+            YqhNeuButton({
               text: this.submitting ? '提交中…' : '提交',
               primary: true,
               btnEnabled: !this.submitting,
@@ -97,6 +105,6 @@ export struct YqhFeedbackAdd {
     }
     .width('100%')
     .height('100%')
-    .linearGradient(BG_GRADIENT)
+    .linearGradient(neuBg(this.dark))
   }
 }

@@ -1,12 +1,14 @@
-// 车主商城列表（M8b，自定义功能 C4）：优惠提醒 + 商品卡 + 收藏切换
-import { COLORS, BG_GRADIENT } from '../common/style/Style'
-import { YqhGlassCard } from '../views/yqhGlassCard'
+// 车主商城列表（M8b，自定义功能 C4，Dark Neumorphism）：优惠提醒 + 商品卡 + 收藏切换
+import { neu, neuBg } from '../common/style/Style'
+import { YqhNeuCard } from '../common/ui/yqhNeuCard'
+import { YqhNeuChip } from '../common/ui/yqhNeuChip'
 import { getMallList, toggleFav } from '../viewmodel/mall'
 import { MallProduct } from '../model/MallBean'
 
 @Component
 export struct YqhMall {
   @Consume('navPathStack') navPathStack: NavPathStack
+  @StorageProp('darkMode') dark: boolean = true
   @State list: MallProduct[] = []
   @State loading: boolean = true
 
@@ -45,20 +47,15 @@ export struct YqhMall {
   @Builder
   productCard(item: MallProduct) {
     Row({ space: 12 }) {
-      Column({ space: 4 }) {
+      Column({ space: 6 }) {
         Row({ space: 6 }) {
           if (item.tag !== '') {
-            Text(item.tag)
-              .fontSize(11)
-              .fontColor(COLORS.ink)
-              .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-              .borderRadius(6)
-              .backgroundColor(COLORS.highlight)
+            YqhNeuChip({ text: item.tag, tone: 'accent' })
           }
           Text(item.name)
             .fontSize(15)
             .fontWeight(FontWeight.Bold)
-            .fontColor(COLORS.ink)
+            .fontColor(neu(this.dark).ink)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .layoutWeight(1)
@@ -68,20 +65,20 @@ export struct YqhMall {
           Text('¥' + item.price)
             .fontSize(18)
             .fontWeight(FontWeight.Bold)
-            .fontColor(COLORS.accentDeep)
+            .fontColor(neu(this.dark).accent)
           Text('¥' + item.originalPrice)
             .fontSize(12)
-            .fontColor(COLORS.inkSub)
+            .fontColor(neu(this.dark).inkSub)
             .decoration({ type: TextDecorationType.LineThrough })
           if (item.discount !== '') {
             Text(item.discount)
               .fontSize(11)
-              .fontColor(COLORS.danger)
+              .fontColor(neu(this.dark).danger)
           }
         }
         Text('已售 ' + item.sales + ' 件')
           .fontSize(11)
-          .fontColor(COLORS.inkSub)
+          .fontColor(neu(this.dark).inkSub)
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
@@ -91,12 +88,15 @@ export struct YqhMall {
 
       Column() {
         Text(item.fav ? '♥' : '♡')
-          .fontSize(24)
-          .fontColor(item.fav ? COLORS.danger : COLORS.inkSub)
+          .fontSize(22)
+          .fontColor(item.fav ? neu(this.dark).accent : neu(this.dark).inkSub)
       }
-      .width(44)
-      .height(44)
+      .width(46)
+      .height(46)
+      .borderRadius(23)
       .justifyContent(FlexAlign.Center)
+      .backgroundColor(neu(this.dark).surfaceSunken)
+      .border({ width: 1, color: neu(this.dark).line })
       .onClick(() => {
         this.fav(item)
       })
@@ -109,17 +109,12 @@ export struct YqhMall {
     Stack() {
       Column({ space: 12 }) {
         // 优惠提醒（C4 ②）
-        YqhGlassCard({ pad: 14 }) {
+        YqhNeuCard({ pad: 14, sunken: true }) {
           Row({ space: 8 }) {
-            Text('惠')
-              .fontSize(13)
-              .fontColor(COLORS.ink)
-              .padding({ left: 8, right: 8, top: 2, bottom: 2 })
-              .borderRadius(8)
-              .backgroundColor(COLORS.highlight)
+            YqhNeuChip({ text: '惠', tone: 'accent' })
             Text('车主专享：部分商品满 199 减 30，新人首单立减 10')
               .fontSize(12)
-              .fontColor(COLORS.ink)
+              .fontColor(neu(this.dark).ink)
               .layoutWeight(1)
           }
           .width('100%')
@@ -127,14 +122,14 @@ export struct YqhMall {
 
         if (this.loading) {
           LoadingProgress()
-            .width(28)
-            .height(28)
-            .color(COLORS.accent)
+            .width(32)
+            .height(32)
+            .color(neu(this.dark).accent)
         } else {
-          List({ space: 10 }) {
+          List({ space: 12 }) {
             ForEach(this.list, (item: MallProduct) => {
               ListItem() {
-                YqhGlassCard({ pad: 0 }) {
+                YqhNeuCard({ pad: 0 }) {
                   this.productCard(item)
                 }
               }
@@ -150,6 +145,6 @@ export struct YqhMall {
     }
     .width('100%')
     .height('100%')
-    .linearGradient(BG_GRADIENT)
+    .linearGradient(neuBg(this.dark))
   }
 }

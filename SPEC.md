@@ -1,8 +1,9 @@
 # SPEC · 车主 App（HarmonyOS ArkTS 原生版）
 
-> 状态：S0 规格待确认（不写代码）。
-> 来源：鸿蒙智能座舱系统需求文档 V1.3、接口文档 V1.1、业务流程判断节点说明、东软实验指导书、UI_STYLE_GUIDE（Apple Liquid Glass 暗色风，作为视觉参考）。
-> 约定：遵循 AI-WORKFLOW.md（规格先于代码、一次一个可验证变化、疑问优先）。落地后另写 `README.md` / `DECISIONS.md`。
+> 状态：**M1–M8 功能全部落地，M9 视觉改版完成 → 现处 S5 打磨 / S6 交付**。
+> 来源：鸿蒙智能座舱系统需求文档 V1.3、接口文档 V1.1、业务流程判断节点说明、东软实验指导书。
+> 视觉主题：**Dark Neumorphism（特斯拉风深色拟态）**——已取代原「用户色卡 奶油黄→薄荷青」与 Apple Liquid Glass 参考，见 §5 / `DECISIONS.md` D1。
+> 约定：遵循 `AI-WORKFLOW.md`（规格先于代码、一次一个可验证变化、疑问优先）。项目地图/代码索引见 `CLAUDE.md`，决策记录见 `DECISIONS.md`。
 
 ---
 
@@ -14,7 +15,9 @@
 |---|---|---|
 | 静态站 | **舍弃** | ArkTS 须由 DevEco/鸿蒙工具链编译打包，不是浏览器静态资源。 |
 | 无构建步骤 | **舍弃** | 同上，鸿蒙工程必然有编译/签名步骤。 |
-| 零美术资产 | **保留** | 仍禁止新增 png/jpg/mp3 等美术/音频文件；改用 ArkUI 内置组件、矢量绘制（Shape/Path）、SVG data-URI、系统图标或纯色/渐变占位。 |
+| 零美术资产 | **保留（口径见下方补充）** | 不新增 png/jpg/mp3 等美术/音频文件；改用 ArkUI 内置组件、矢量绘制（Shape/Path）、系统符号/emoji 或纯色/渐变占位。 |
+
+> **现状补充（M9）**：课程推进中实际引入了 4 个 media 图片（车辆底图 `bg_start`/`bg_owner_car`、控制图标 `ic_door_lock`/`ic_light_open`，来源与许可证已标注在设置页「素材来源」）。故该约束**执行口径放宽为「不再新增美术资产，图标优先 emoji + ArkUI 绘制」**——M9 视觉改版本身**未新增任何图片**，拟态质感（双投影 / 渐变 / 凹陷轨道）全部由 ArkUI 绘制。
 
 **技术靶心 = 鸿蒙 ArkTS（Stage 模型 + ArkUI 声明式 + MVVM 分层）**，满足东软实验指导书的 KT1–KT11 与评分标准。
 
@@ -36,45 +39,62 @@
 
 ## 2. 模块划分（文件名 / 职责 / 预估行数，总计 ≈ 4800 行，< 5000）
 
-工程采用 Stage 模型 + MVVM 目录（参考华为官方 ArkTS-MVVM，**遵循既有 `yqhapplication` 代码规范**：struct 带 `yqh` 前缀、组件 `XxxCom.ets`/`Xxx.ets`、`@kit` 导入、`AppStorage`+`PersistentStorage` 持久化、根 `Navigation`+`NavPathStack`+`Tabs` 导航、集中 `Style.ets` 令牌）。车主 App 页面统一置于 `pages/yqhcar/` 分组，与既有 leson 草稿隔离；启动页 `pages/yqhcar/yqhWelcome` 注册为 `main_pages.json` 首项。图标用 `SymbolGlyph` 系统符号（零美术资产，不引用 `app.media.*` 图片）。
+工程采用 Stage 模型 + MVVM 目录（参考华为官方 ArkTS-MVVM，**遵循既有 `yqhapplication` 代码规范**：struct 带 `yqh` 前缀、组件 `XxxCom.ets`/`Xxx.ets`、`@kit` 导入、`AppStorage`+`PersistentStorage` 持久化、根 `Navigation`+`NavPathStack`+`Tabs` 导航、集中 `Style.ets` 令牌）。
 
-| 文件 | 量级 | 职责 | 什么时候改它 |
+> **目录已于 MVVM 重构后变更（与此前记录不同，下表为现况）**：模型在 `ets/model/`、接口函数在 `ets/viewmodel/`、业务组件在 `views/comps/`、通用控件在 `common/ui/`、页面直接放 `pages/` 根（**不再有 `pages/yqhcar/` 分组**）；启动页 `pages/yqhWelcome` 注册为 `main_pages.json` 首项。车主 App 与课堂作业（`pages/leson*`、`pages/zuoye*`、`pages/login`、`pages/Perferences`、`pages/Index.ets`）严格隔离，后者只读不改。
+> 视觉主题已于 M9 改为 **Dark Neumorphism（特斯拉风深色拟态）**，见 §5「UI 风格」与 `DECISIONS.md` D1。图标用 emoji + ArkUI 绘制（仅保留 4 个既有 media 图片：车辆底图 `bg_start`/`bg_owner_car`、控制图标 `ic_door_lock`/`ic_light_open`），见 §0 约束变更说明。
+
+> 行数为当前实测值（含本次 M9 视觉改版）。
+
+| 文件 | 行 | 职责 | 什么时候改它 |
 |---|---|---|---|
-| `entry/src/main/ets/entryability/EntryAbility.ets` | 60 | Ability 生命周期；冷启动进入 `pages/yqhcar/yqhWelcome` | 改启动/权限 |
-| `entry/src/main/ets/pages/yqhcar/yqhWelcome.ets` | 130 | 欢迎页（struct YqhWelcome）：色卡浅色渐变背景，3s 计时，按 `isLogin` 分流到 yqhIndex 或 yqhLogin | 改欢迎页 |
-| `entry/src/main/ets/pages/yqhcar/yqhLogin.ets` | 230 | 登录（struct YqhLogin）：账号密码→`getLogin`→存 token/user→`getUserInfo` 判 carVin→绑车或首页；401 处理 | 改登录 |
-| `entry/src/main/ets/pages/yqhcar/yqhRegister.ets` | 210 | 注册（struct YqhRegister）：两次密码一致校验、必填校验、调用 `getRegister` | 改注册 |
-| `entry/src/main/ets/pages/yqhcar/yqhBindCar.ets` | 150 | 绑车/换绑（struct YqhBindCar）：VIN 格式校验→`bindCarByVin`→回首页 | 改绑车 |
-| `entry/src/main/ets/pages/yqhcar/yqhIndex.ets` | 240 | 根 Navigation+Tabs 首页枢纽（struct YqhIndex）：`@Provide('navPathStack')`+`pageMap`+四个 Tab（首页/车控/反馈/我的），页内详情走 NavDestination（C5） | 改导航 |
-| `entry/src/main/ets/pages/yqhcar/comps/yqhCarInfoComp.ets` | 120 | 车辆信息卡：名称/续航/电量/百分比/更新时间（接口4.5） | 改车辆信息 |
-| `entry/src/main/ets/pages/yqhcar/comps/yqhAirConditionComp.ets` | 250 | 智能空调：AC/循环/制冷/除雾开关+温度±（接口4.6/4.7） | 改空调 |
-| `entry/src/main/ets/pages/yqhcar/comps/yqhLogListComp.ets` | 280 | 用户行为日志：List+ForEach+左滑删除+二次确认（接口4.10） | 改日志 |
-| `entry/src/main/ets/pages/yqhcar/yqhControl.ets` | 230 | 车控：车门/车灯开关、前后左右移动+停车（接口4.6/4.8） | 改车控 |
-| `entry/src/main/ets/pages/yqhcar/yqhFeedback.ets` | 240 | 反馈列表+下拉刷新/上拉加载+左滑删除（接口4.9.1/4.9.4） | 改反馈列表 |
-| `entry/src/main/ets/pages/yqhcar/yqhFeedbackAdd.ets` | 180 | 新增反馈：≤100 字校验（接口4.9.2） | 改新增 |
-| `entry/src/main/ets/pages/yqhcar/yqhFeedbackDetail.ets` | 150 | 反馈详情+官方回复（接口4.9.3） | 改详情 |
-| `entry/src/main/ets/pages/yqhcar/yqhMine.ets` | 220 | 我的：个人信息、换绑入口、退出清状态、设置入口（读取 `@StorageProp`） | 改我的 |
-| `entry/src/main/ets/pages/yqhcar/yqhSettings.ets` | 150 | 设置：字号/主题持久化（PersistentStorage，KT10） | 改设置 |
-| `entry/src/main/ets/pages/yqhcar/yqhMall.ets` | 200 | 车主商城列表：商品卡+收藏切换（mock/接口） | 改商城列表 |
-| `entry/src/main/ets/pages/yqhcar/yqhMallDetail.ets` | 220 | 商城详情：价格/优惠/描述/收藏+**产品评价**（C4） | 改商城详情 |
-| `entry/src/main/ets/common/constants/HttpApi.ets` | 120 | `BaseUrl` + 全部接口路径常量；`USE_MOCK` 开关（C2） | 改接口地址 |
-| `entry/src/main/ets/common/utils/RequestUtil.ets` | 280 | HTTP 封装（Promise）：`get/post/put/delete` 统一带 `Authorization`、`code==200` 判定、`401` 清登录回登录页；`USE_MOCK` 时走 MockData | 改请求/错误 |
-| `entry/src/main/ets/common/utils/StorageUtils.ets` | 120 | 基于 `AppStorage`+`PersistentStorage` 的键封装（token/carVin/carId/userId/userName/avatar/isLogin），遵循既有 `persistProp` 模式（KT10） | 改持久化 |
-| `entry/src/main/ets/common/utils/MockData.ets` | 200 | 与接口字段一致的本地 mock（登录/用户/车辆/状态/反馈/日志/商城） | 调 mock |
-| `entry/src/main/ets/common/style/Style.ets` | 80 | 设计令牌 `COLORS`/`GLASS_GRADIENT`/`ACCENT_GRADIENT`（沿用既有 Style.ets 暗色玻璃风） | 改主题 |
-| `entry/src/main/ets/common/constants/Constants.ets` | 120 | 数值表常量（见 §3） | 调数值 |
-| `entry/src/main/ets/common/model/IResult.ets` | 30 | 统一返回 `IResult{code,msg,token}` | 改返回 |
-| `entry/src/main/ets/common/model/UserInfoBean.ets` | 40 | 用户信息（含 user 嵌套） | — |
-| `entry/src/main/ets/common/model/CarInfoBean.ets` | 50 | 车辆管理信息（接口4.5） | — |
-| `entry/src/main/ets/common/model/CarStateBean.ets` | 60 | 车辆状态 + `CarStateChange` 请求体 | — |
-| `entry/src/main/ets/common/model/FeedBackBean.ets` | 50 | 反馈列表/详情 Bean | — |
-| `entry/src/main/ets/common/model/MessageInfoBean.ets` | 50 | 操控日志 Bean | — |
-| `entry/src/main/ets/common/model/MallBean.ets` | 50 | 商城商品 + `Review` Bean | — |
-| `entry/src/main/ets/common/model/ApiReq.ets` | 60 | LoginReq/RegisterReq/BindReq 等请求体 | — |
-| `entry/src/main/ets/common/api/*.ets` | 220 | 接口函数（getLogin/getRegister/getUserInfo/getCarInfo/getCarState/changeCarState/getFeedbackList/addFeedback/getFeedbackDetail/deleteFeedback/getLogList/deleteLog/bindCarByVin/getMallList） | 加/改接口 |
-| `entry/src/main/module.json5` + `resources/base/profile/main_pages.json` + `resources/base/element/string.json` | 200 | INTERNET 权限、页面注册（含 yqhcar 各页，启动页 yqhWelcome）、应用名 `杨庆鸿的车主App`、字符串资源（无图片 media） | 改权限/注册 |
-| `entry/src/main/ets/common/ui/*.ets` | 400 | 复用 UI 组件库（封存）：`yqhGlassCard`/`yqhButton`/`yqhToggle`/`yqhSlider`/`yqhAvatar`/`yqhEmpty`/`yqhLoading`/`yqhDialog`/`yqhTabBar` 等，带 `@Prop/@Link` 入参、可 `@Preview`，业务页只组装 | 改通用 UI |
-| **合计** | **≈ 5000** | | |
+| **入口** | | | |
+| `entry/src/main/ets/entryability/EntryAbility.ets` | 50 | Ability 生命周期；冷启动进入 `pages/yqhWelcome` | 改启动/权限 |
+| **视图 · 页面**（`pages/`，共 14 个车主页） | | | |
+| `pages/yqhWelcome.ets` | 59 | 欢迎页：拟态品牌环 + 标语，3s 后按 `isLogin` 分流 | 改欢迎页 |
+| `pages/yqhLogin.ets` | 198 | 登录：账号密码→`getLogin`→存 token→`getUserInfo` 判 carVin→绑车/首页；401 内联红字 | 改登录 |
+| `pages/yqhRegister.ets` | 157 | 注册：两次密码一致校验、必填校验、调用 `getRegister` | 改注册 |
+| `pages/yqhBindCar.ets` | 132 | 绑车/换绑：VIN 校验→`bindCarByVin`→回首页（`from=mine` 时 back） | 改绑车 |
+| `pages/yqhIndex.ets` | 142 | 根 `Navigation`+`NavPathStack`+`Tabs` 枢纽：四个 Tab（首页/车辆控制/反馈/我的）；`pageMap` 挂 7 个子页（C5） | 改导航 / 加子页 |
+| `pages/yqhControl.ets` | 231 | 车控：十字方向键（按住移动/松开停车）+ 车门/车灯/空调圆键（4.6/4.8） | 改车控 |
+| `pages/yqhFeedback.ets` | 242 | 反馈列表：下拉刷新 / 上拉加载 / 左滑删除 + 二次确认（4.9.1/4.9.4） | 改反馈列表 |
+| `pages/yqhFeedbackAdd.ets` | 109 | 新增反馈：≤100 字校验（4.9.2） | 改新增 |
+| `pages/yqhFeedbackDetail.ets` | 104 | 反馈详情 + 官方回复（4.9.3） | 改详情 |
+| `pages/yqhLog.ets` | 82 | 车辆操作日志「信息」页（当前本地生成，接口 4.10 预留） | 改日志 |
+| `pages/yqhMall.ets` | 150 | 车主商城列表：优惠提醒 + 商品卡 + 收藏 | 改商城列表 |
+| `pages/yqhMallDetail.ets` | 158 | 商城详情：价格/优惠/描述/收藏 + **产品评价**（C4） | 改商城详情 |
+| `pages/yqhMine.ets` | 167 | 我的：凹陷头像 + 昵称 + VIN 条 + 三行入口 + 退出登录（清状态） | 改我的 |
+| `pages/yqhSettings.ets` | 143 | 设置：字号三档 + 深色拟态主题（PersistentStorage，KT10）+ 素材来源 | 改设置 |
+| **视图 · 业务组件**（`views/comps/`） | | | |
+| `views/comps/yqhCarInfoComp.ets` | 200 | 首页车辆信息卡：环形电量表盘 + 门/灯/空调圆键（4.5/4.6） | 改车辆信息 |
+| `views/comps/yqhAirConditionComp.ets` | 224 | 首页智能空调：环形温度旋钮 + 循环/A·C/除雾（4.6/4.7） | 改空调 |
+| **视图 · 通用组件库**（`common/ui/`，业务页只组装） | | | |
+| `common/ui/yqhNeuCard.ets` | 53 | 拟态卡片（凸起 / 凹陷双投影） | 改卡片 |
+| `common/ui/yqhNeuButton.ets` | 61 | 主/次按钮（红渐变发光 / 拟态凸起） | 改按钮 |
+| `common/ui/yqhNeuCircleButton.ets` | 99 | 圆形快捷键：凸起→按下凹陷微缩→激活发光；支持 emoji / 图片 / 标签 / 长按 | 改圆键 |
+| `common/ui/yqhNeuRing.ets` | 58 | 环形表盘（电量 / 温度），凹陷轨道 | 改表盘 |
+| `common/ui/yqhNeuToggle.ets` | 55 | 开关行 | 改开关 |
+| `common/ui/yqhNeuTabItem.ets` | 39 | 底部 Tab 项（选中凹陷 + 主色） | 改 Tab |
+| `common/ui/yqhNeuChip.ets` | 38 | 状态徽标（accent/ok/warn/danger） | 改徽标 |
+| **数据 · 接口函数**（`viewmodel/`） | | | |
+| `viewmodel/auth.ets` | 36 | 登录 / 注册 / 用户信息 / 绑车 | 改鉴权接口 |
+| `viewmodel/car.ets` | 49 | 车辆信息 / 状态 / 状态变更 / 移动 / 操作日志 | 改车辆接口 |
+| `viewmodel/feedback.ets` | 61 | 反馈列表 / 新增 / 详情 / 删除 | 改反馈接口 |
+| `viewmodel/mall.ets` | 12 | 商城列表 / 收藏（本地 mock） | 改商城接口 |
+| **数据 · 模型**（`model/`） | 285 | `ApiReq`61 / `CarInfoBean`50 / `CarStateBean`36 / `CarLogBean`23 / `FeedBackBean`46 / `MallBean`50 / `UserInfoBean`13 / `IResult`6：请求体 + `parseXxx` 解析 | 加 / 改字段 |
+| **基础设施** | | | |
+| `common/utils/RequestUtil.ets` | 57 | 统一 POST：Bearer 鉴权、HTTP 401 清态跳登录、hilog 埋点 | 改请求 / 错误 |
+| `common/utils/StorageUtils.ets` | 97 | `StorageKeys` + `AppStorage`/`PersistentStorage` 封装（KT10） | 改持久化 |
+| `common/utils/MockData.ets` | 360 | 与接口字段一致的本地 mock（登录/用户/车辆/状态/反馈/日志/商城） | 调 mock |
+| `common/constants/HttpApi.ets` | 39 | `BaseUrl` + 12 条接口路径 + `USE_MOCK` 开关（C2） | 改接口地址 / 切 mock |
+| `common/constants/Constants.ets` | 47 | 数值表（含 `NEU_*` 拟态几何常量，见 §3） | 调数值 |
+| `common/style/Style.ets` | 152 | 设计令牌：`NEU_DARK`/`NEU_LIGHT` + `neu()`/`neuBg()`（另保留旧 `COLORS` 色卡） | 改主题 |
+| `entry/src/main/module.json5` + `resources/base/profile/main_pages.json` + `resources/base/element/string.json` | — | INTERNET 权限、22 个页面注册（启动页 `yqhWelcome` 首项）、应用名 `杨庆鸿的车主App`、字符串资源 | 改权限 / 注册 |
+| **遗留（未引用，保留待清）** | | | |
+| `views/yqhGlassCard.ets`20 / `views/yqhButton.ets`29 / `views/yqhToggle.ets`43 | 92 | 旧浅色玻璃风组件，车主 App 已不再引用 | — |
+| **课堂作业（只读，不许改）** | | | |
+| `pages/leson*/`、`pages/zuoye*/`、`pages/login/`、`pages/Perferences/`、`pages/Index.ets` | 3094 / 51 个文件 | 课程草稿，与车主 App 隔离 | 不许改 |
+| **合计（车主 App 部分）** | **≈ 4250** | 66 个 .ets 文件 | |
 
 > 单文件不超过 800 行；一个文件一个职责；struct 命名带 `yqh` 前缀体现原创性；遵循既有 `yqhapplication` 代码规范（见 §8）。
 
@@ -86,7 +106,7 @@
 |---|---|---|---|
 | 欢迎页自动跳转 | `WELCOME_MS` | 3000 | 到时按登录态分流 |
 | 接口基地址 | `BASE_URL` | `http://121.36.14.143:10001` | 真服务器 |
-| Mock 开关 | `USE_MOCK` | `false`（默认直连真服务器） | `true` 时走本地 mock；可用 `AppStorage` 运行时切换（C2 已裁决：默认直连） |
+| Mock 开关 | `USE_MOCK` | **`true`（现状）** / 目标 `false` | 目标值仍为直连真服务器（C2 裁决）；现状因后端 `/app/**` 尚返回业务码 401 而置 `true`，后端放行后改回即可 |
 | 请求软超时提示阈值 | `API_WARN_MS` | 2000 | 评分要求响应 <2s，超则 toast |
 | Toast 时长 | `TOAST_MS` | 2000 | |
 | 日志分页大小 | `LOG_PAGE_SIZE` | 10 | 接口 `pageSize` |
@@ -98,7 +118,10 @@
 | 开关值 | `ON/OFF` | `"1"` / `"0"` | 门/灯/AC/循环/除雾/风扇统一字符串 |
 | VIN 校验 | `VIN_PATTERN` | `^[A-Za-z0-9-]{4,17}$` | 台架 VIN=`4494356c` |
 | 默认 mock carId | `MOCK_CAR_ID` | `"1"` | |
-| 视觉参考 | — | Apple Liquid Glass 暗色（仅参考，ArkUI 用渐变+毛玻璃 `blur`+半透明实现） | 不引入图片资源 |
+| 视觉参考（M9 更新） | — | **Dark Neumorphism（特斯拉风深色拟态）**：卡片与背景同色，靠双投影造体积 | 见 §5 / `DECISIONS.md` D1 |
+| 拟态阴影偏移 | `NEU_DISTANCE` / `NEU_DISTANCE_SM` | 6 / 4 | 右下暗影偏移；小控件用小值 |
+| 拟态阴影模糊 | `NEU_BLUR` / `NEU_BLUR_SM` / `NEU_BLUR_GLOW` | 12 / 8 / 16 | GLOW 用于激活态发光 |
+| 卡片圆角 | `NEU_RADIUS` / `NEU_RADIUS_SM` | 24 / 16 | |
 | 触控目标 | — | ≥ 44×44 vp | 无障碍 |
 
 ---
@@ -154,14 +177,14 @@ export interface BindReq { carVin: string; }
 ## 5. 技术选型
 
 - **语言/框架**：ArkTS + ArkUI 声明式（HarmonyOS NEXT，Stage 模型）。
-- **架构**：MVVM 分层（`common/model` 数据 / `common/api` 接口函数 / `common/utils`、`common/constants`、`common/style` 工具 / `pages/yqhcar` 视图）；页面级状态 `@State/@Prop/@Link`（KT6），应用级共享 `@Provide/@Consume` + `AppStorage`/`PersistentStorage`（KT7）。
+- **架构**：MVVM 分层（`model/` 数据模型 / `viewmodel/` 接口函数 / `common/utils`、`common/constants`、`common/style` 工具 / `pages/` + `views/comps/` + `common/ui/` 视图）；页面级状态 `@State/@Prop/@Link`（KT6），应用级共享 `@Provide/@Consume` + `AppStorage`/`PersistentStorage`（KT7）。**目录已按 MVVM 重构，旧路径 `common/model`、`common/api`、`pages/yqhcar` 已不存在**。
 - **路由**：欢迎/登录/注册/绑车用 `@ohos.router`（`replaceUrl`，须 `@Entry`）；首页根 `Navigation` 承载底部模块切换（首页/车控/反馈/我的 四个 `NavDestination` + 自定义底部 Tab 栏），页内列表→详情用 `Navigation` 子页（实验指导书推荐，C5 已裁决）。
-- **网络**：`@ohos.net.http`（`httpRequest.request`），需 `module.json5` 声明 `ohos.permission.INTERNET`；统一封装于 `RequestUtil`，含 `USE_MOCK` 开关（**默认 `false` 直连真服务器 `BASE_URL`**，C2 已裁决；置 `true` 走本地 mock，保留开关便于无后端验收）。注意：真服务器若未开 CORS，模拟器/真机可能跨域失败，届时可切 mock 排查。
+- **网络**：`@kit.NetworkKit` 的 `http`（`httpRequest.request`），需 `module.json5` 声明 `ohos.permission.INTERNET`；统一封装于 `common/utils/RequestUtil.ets`（只封装了 `post`），含 `USE_MOCK` 开关（C2 裁决目标为 `false` 直连真服务器 `BaseUrl`；**现状为 `true`**，因后端 `/app/**` 返回业务码 401，放行后改回）。请求/响应/耗时用 `hilog`（tag `yqhHttp`）落日志，便于联调。
 - **绑车判据（C3 已裁决）**：登录成功后 `getUserInfo`，仅当 `carVin` 为空才进绑车页，否则进首页（贴合需求文档/流程节点，不判 `carId`）。
 - **持久化（KT10，遵循既有代码规范）**：采用既有 `PersistentStorage.persistProp` + `AppStorage`（`setOrCreate`/`get`/`@StorageProp`/`@StorageLink`）模式，底层即为"用户首选项"；`StorageUtils.ets` 仅封装键名常量，存 token/carVin/carId/userId/userName/avatar/isLogin。**注**：与实验指导书示例的 `preferences.getPreferencesSync` 写法不同，但同为 KT10 持久化，且更贴合本工程既有规范。
-- **UI 风格（用户色卡已裁决，覆盖先前"暗色玻璃"）**：以用户提供的色卡为主色调——奶油黄→薄荷青纵向渐变背景 + 半透明白卡 + `blur` 轻毛玻璃 + 细描边、圆角、克制动效；正文用深墨绿保证浅底对比度；**不引入任何图片/音频文件**（零美术资产）。色卡令牌见 §8 第 7 条。
-- **图标（零美术资产）**：用 `SymbolGlyph` 系统符号图标（HarmonyOS NEXT 内置，无需图片文件），替代既有代码里的 `Image($r('app.media.*'))` 图片用法；头像用 `SymbolGlyph` 或字母圆形占位。不新增任何 media 图片资源。
-- **命名与目录（遵循既有规范）**：struct 带 `Yqh` 前缀、PascalCase（如 `YqhLogin`/`YqhIndex`）体现原创性；页面文件 `yqhXxx.ets`、组件 `XxxCom.ets`/`Xxx.ets`；车主 App 全部页面置于 `pages/yqhcar/`（与既有 leson 草稿隔离）；启动页 `yqhWelcome` 注册为 `main_pages.json` 首项；应用名在 `string.json` 设为 `杨庆鸿的车主App`（C1）。
+- **UI 风格（M9 已裁决：Dark Neumorphism 特斯拉风深色拟态，覆盖先前的"用户色卡"与"暗色玻璃"）**：近黑底 `#22262B` + 特斯拉红 `#E82127`；卡片与背景同色，靠「左上亮边 + 右下暗影」双层投影造体积；进度/表盘用凹陷轨道；主按钮红渐变 + 柔光；正文 `#EAEEF3` 保证暗底对比度。**零新增美术资产**（质感全部由 ArkUI 绘制）。拟态令牌见 §8 第 7 条。
+- **图标（M9 已更新）**：业务页一律用 **emoji + ArkUI 绘制**（零美术资产，规避 `SymbolGlyph` 在部分 API 版本的兼容问题）；仅车辆底图 `bg_start`/`bg_owner_car` 与控制图标 `ic_door_lock`/`ic_light_open` 沿用既有 4 个 media 图片；头像用字母圆形占位（凹陷面），不新增任何 media 资源。
+- **命名与目录（遵循既有规范，M9 已同步现况）**：struct 带 `Yqh` 前缀、PascalCase（如 `YqhLogin`/`YqhIndex`）体现原创性；页面文件 `pages/yqhXxx.ets`、业务组件 `views/comps/yqhXxxComp.ets`、通用控件 `common/ui/yqhNeuXxx.ets`；车主 App 页面直接置于 `pages/` 根（课堂作业 `pages/leson*|zuoye*|login|Perferences` 隔离，只读不改）；启动页 `pages/yqhWelcome` 注册为 `main_pages.json` 首项；应用名在 `string.json` 设为 `杨庆鸿的车主App`（C1）。
 - **扩展技术**：① 列表下拉刷新（`Refresh`）+ 上拉加载（`List.onReachEnd`/`edgeEffect`）；② 请求封装（已做）；③ 可选 Axios（鸿蒙版）作为加分项；④ 设置页字号/主题持久化（KT10）。
 
 ---
@@ -171,7 +194,7 @@ export interface BindReq { carVin: string; }
 | 里程碑 | 能看到什么（玩家可感知） |
 |---|---|
 | **M0** | 本 SPEC 定稿（模块划分、数值/类型表、约束裁定）。无代码。 |
-| **M1** | 工程可编译运行；**欢迎页**出现（色卡浅色渐变），3s 后按是否已登录自动跳登录页或首页。**完成后 git 提交并推送（见 §9）**。 |
+| **M1** | 工程可编译运行；**欢迎页**出现（深色拟态底 + 拟态品牌环），3s 后按是否已登录自动跳登录页或首页。**完成后 git 提交并推送（见 §9）**。 |
 | **M2** | **登录 / 注册页**可用：登录存 token；注册含"两次密码一致"校验与"账号已存在"提示。**（已完成）** |
 | **M3** | **绑车流程**：首次登录（无 carVin）强制进绑车页，VIN 格式校验，绑定后回首页；非首次直进首页。 |
 | **M4** | **首页车辆信息卡**：显示车辆名称、可续航里程、电池电量+百分比、更新时间（接口4.5 / mock）。 |
@@ -179,8 +202,12 @@ export interface BindReq { carVin: string; }
 | **M6** | **车控页**：车门/车灯开关；前/后/左/右移动（按下移动、松开停车）；状态实时反映。 |
 | **M7** | **反馈模块**：列表（下拉刷新/上拉加载）、新增（≤100 字校验）、详情看内容与官方回复、左滑删除+二次确认。 |
 | **M8** | **我的页 + 车主商城**：个人信息、换绑车辆、退出清状态、设置持久化；商城列表+详情+收藏+**产品评价**（mock）。 |
+| **M9** | **视觉改版 Dark Neumorphism**：14 个车主页 + 2 个业务组件 + 7 个新拟态组件换成特斯拉风深色拟态——环形电量表盘、环形温度旋钮、十字方向键（按住移动/松开停车）、拟态 Tab 栏。**零新增图片**，质感全部由 ArkUI 绘制。（含文档：CLAUDE.md / DECISIONS.md） |
 
-> M1–M8 每个只交付"一个玩家能感知的行为变化"，对应一条 commit + 一句英文行为描述（见 AI-WORKFLOW 收尾规范）。
+> M1–M9 每个只交付"一个玩家能感知的行为变化"，对应一条 commit + 一句英文行为描述（见 AI-WORKFLOW 收尾规范）。
+> **进度**：M1–M9 均已完成并入 git；当前处在 S6 交付（文档齐全 + 推送 GitHub）。
+> **遗留**：车主商城（M8b）页面已写好但**没有入口**，见 §7 C10 与 `DECISIONS.md` D9。
+> **编译提醒**：改动只做过静态自检，编译与运行须在 DevEco Studio（本机无 `hvigorw`/SDK 命令行环境）。
 
 ---
 

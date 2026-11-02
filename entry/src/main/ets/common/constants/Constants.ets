@@ -48,3 +48,12 @@ export const MOVE_STOP: string = 'stop'
 
 // 商城/车辆 mock
 export const MOCK_CAR_ID: string = '1'
+
+// 新拟态几何（Dark Neumorphism）：阴影偏移距离 / 模糊半径 / 卡片圆角
+export const NEU_DISTANCE: number = 6 // 右下暗影偏移
+export const NEU_DISTANCE_SM: number = 4 // 小尺寸控件偏移
+export const NEU_BLUR: number = 12 // 阴影模糊半径
+export const NEU_BLUR_SM: number = 8 // 小尺寸控件模糊半径
+export const NEU_BLUR_GLOW: number = 16 // 激活态主色发光半径
+export const NEU_RADIUS: number = 24 // 卡片圆角
+export const NEU_RADIUS_SM: number = 16 // 小卡片/行圆角

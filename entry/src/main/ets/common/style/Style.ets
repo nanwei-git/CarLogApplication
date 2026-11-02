@@ -69,7 +69,98 @@ export const BG_GRADIENT_DARK: LinearGradient = {
   ]
 }
 
-// 主题选择：true 深色 / false 浅色（用户色卡）
+// ============ Dark Neumorphism（深色拟态 · 特斯拉风，车主 App 主视觉）============
+// 新拟态要点：卡片与背景同色，靠"左上亮边 + 右下暗影"双层投影造出体积感。
+// 深色 = 特斯拉风近黑底；浅色 = 同结构浅灰底（设置页可切换，KT10 持久化）。
+
+interface NeuColors {
+  bg0: string
+  bg1: string
+  bg2: string
+  bg3: string
+  surface: string // 拟态基底（卡片与背景同色）
+  surfaceRaised: string // 内圈高光面
+  surfaceSunken: string // 凹陷面（按下态 / 进度轨道）
+  line: string
+  track: string // 进度环轨道
+  ink: string
+  inkSub: string
+  accent: string // 特斯拉红
+  accentDeep: string
+  accentSoft: string // 主色柔光（激活态发光阴影）
+  ok: string
+  warn: string
+  danger: string
+  shadowDark: string // 右下暗影
+  shadowLight: string // 左上亮边
+}
+
+// 深色拟态（默认主题）
+export const NEU_DARK: NeuColors = {
+  bg0: '#23272C',
+  bg1: '#1F2327',
+  bg2: '#1C1F23',
+  bg3: '#191C20',
+  surface: '#22262B',
+  surfaceRaised: '#282D33',
+  surfaceSunken: '#181B1F',
+  line: 'rgba(255,255,255,0.06)',
+  track: '#171A1E',
+  ink: '#EAEEF3',
+  inkSub: '#8B949F',
+  accent: '#E82127',
+  accentDeep: '#FF6A6A',
+  accentSoft: 'rgba(232,33,39,0.30)',
+  ok: '#3DDC97',
+  warn: '#F5C451',
+  danger: '#E5484D',
+  shadowDark: 'rgba(0,0,0,0.70)',
+  shadowLight: 'rgba(255,255,255,0.055)'
+}
+
+// 浅色拟态（设置页关闭"深色拟态"时的同结构浅色版）
+export const NEU_LIGHT: NeuColors = {
+  bg0: '#EAEEF4',
+  bg1: '#F0F3F8',
+  bg2: '#F6F8FC',
+  bg3: '#FAFBFE',
+  surface: '#E9ECF2',
+  surfaceRaised: '#F2F4F9',
+  surfaceSunken: '#DCE0E8',
+  line: 'rgba(255,255,255,0.85)',
+  track: '#DADEE6',
+  ink: '#22262B',
+  inkSub: '#7C8695',
+  accent: '#E82127',
+  accentDeep: '#FF6A6A',
+  accentSoft: 'rgba(232,33,39,0.22)',
+  ok: '#1FA97A',
+  warn: '#D9962B',
+  danger: '#D93B45',
+  shadowDark: 'rgba(163,177,198,0.55)',
+  shadowLight: 'rgba(255,255,255,0.90)'
+}
+
+// 拟态令牌取值：true 深色拟态 / false 浅色拟态
+export function neu(dark: boolean): NeuColors {
+  return dark ? NEU_DARK : NEU_LIGHT
+}
+
+// 拟态纵向渐变背景（页面根容器统一使用）
+export function neuBg(dark: boolean): LinearGradient {
+  const c: NeuColors = neu(dark)
+  return {
+    direction: GradientDirection.Bottom,
+    colors: [
+      [c.bg0, 0.0] as [string, number],
+      [c.bg1, 0.35] as [string, number],
+      [c.bg2, 0.7] as [string, number],
+      [c.bg3, 1.0] as [string, number]
+    ]
+  }
+}
+
+// 主题选择（兼容既有页面）：true 深色拟态 / false 用户色卡
 export function palette(dark: boolean): AppColors {
   return dark ? COLORS_DARK : COLORS
 }

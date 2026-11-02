@@ -1,9 +1,11 @@
-// 首页智能空调（M5，接口 4.6/4.7）：圆形温度旋钮（弧）+ 循环/A·C/除雾 圆形切换 + 开关
-// 形态参考 Tesla 新拟态；配色沿用浅青白 / 青蓝
+// 首页智能空调（M5，接口 4.6/4.7）：环形温度旋钮 + 循环 / A·C / 除雾（Dark Neumorphism）
 import { promptAction } from '@kit.ArkUI'
-import { COLORS } from '../../common/style/Style'
-import { YqhGlassCard } from '../yqhGlassCard'
-import { YqhButton } from '../yqhButton'
+import { neu } from '../../common/style/Style'
+import { YqhNeuCard } from '../../common/ui/yqhNeuCard'
+import { YqhNeuRing } from '../../common/ui/yqhNeuRing'
+import { YqhNeuCircleButton } from '../../common/ui/yqhNeuCircleButton'
+import { YqhNeuButton } from '../../common/ui/yqhNeuButton'
+import { YqhNeuChip } from '../../common/ui/yqhNeuChip'
 import { getCarState, changeCarState } from '../../viewmodel/car'
 import { CarStat } from '../../model/CarStateBean'
 import { CarStateChange } from '../../model/ApiReq'
@@ -19,10 +21,9 @@ import {
   TOAST_MS
 } from '../../common/constants/Constants'
 
-const NEU_BG: string = '#E9F2F4'
-
 @Component
 export struct YqhAirConditionComp {
+  @StorageProp('darkMode') dark: boolean = true
   @State stat: CarStat = new CarStat()
   @State loading: boolean = true
   @State busy: boolean = false
@@ -103,160 +104,118 @@ export struct YqhAirConditionComp {
       })
   }
 
-  // 圆形温度旋钮（弧）
-  @Builder
-  tempDial() {
-    Stack({ alignContent: Alignment.Center }) {
-      Progress({ value: this.tempPercent(), total: 100, type: ProgressType.Ring })
-        .width(160)
-        .height(160)
-        .style({ strokeWidth: 12 })
-        .color(COLORS.accent)
-      Column({ space: 2 }) {
-        Text(this.currentTemp() + '℃')
-          .fontSize(34)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(COLORS.accentDeep)
-        Text('设定温度')
-          .fontSize(12)
-          .fontColor(COLORS.inkSub)
-      }
-    }
-    .width(160)
-    .height(160)
-  }
-
-  // 圆形功能切换按钮
-  @Builder
-  neuToggle(icon: string, label: string, active: boolean, onClick: () => void) {
-    Column({ space: 6 }) {
-      Button({ type: ButtonType.Circle }) {
-        Text(icon)
-          .fontSize(22)
-          .fontColor(active ? '#FFFFFF' : COLORS.ink)
-      }
-      .width(60)
-      .height(60)
-      .borderRadius(30)
-      .backgroundColor(active ? COLORS.accent : NEU_BG)
-      .shadow({ radius: 8, color: 'rgba(31,35,41,0.12)', offsetX: 3, offsetY: 3 })
-      .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
-      .onClick(onClick)
-      Text(label)
-        .fontSize(12)
-        .fontColor(COLORS.inkSub)
-    }
-  }
-
   build() {
-    Column({ space: 12 }) {
+    Column({ space: 14 }) {
       if (this.loading) {
         LoadingProgress()
-          .width(28)
-          .height(28)
-          .color(COLORS.accent)
+          .width(32)
+          .height(32)
+          .color(neu(this.dark).accent)
         Text('正在获取车辆状态…')
           .fontSize(13)
-          .fontColor(COLORS.inkSub)
-      } else if (!this.isOn(this.stat.acBtn)) {
-        // 关闭态
-        YqhGlassCard({ pad: 20 }) {
-          Column({ space: 16 }) {
-            Text('智能空调')
-              .fontSize(16)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(COLORS.ink)
-              .width('100%')
-            Stack({ alignContent: Alignment.Center }) {
-              Progress({ value: 0, total: 100, type: ProgressType.Ring })
-                .width(160)
-                .height(160)
-                .style({ strokeWidth: 12 })
-                .color('#D5DCE0')
-              Column({ space: 4 }) {
-                Text('❄')
-                  .fontSize(22)
-                  .fontColor('#9AA3A8')
-                Text('已关闭')
-                  .fontSize(13)
-                  .fontColor(COLORS.inkSub)
-              }
-            }
-            .alignSelf(ItemAlign.Center)
-            YqhButton({
-              text: '开启空调',
-              onBtnClick: () => this.apply({ carVin: getCarVin(), acBtn: SWITCH_ON })
-            })
-          }
-        }
+          .fontColor(neu(this.dark).inkSub)
       } else {
-        // 开启态
-        YqhGlassCard({ pad: 20 }) {
-          Column({ space: 16 }) {
-            Text('智能空调')
-              .fontSize(16)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(COLORS.ink)
+        YqhNeuCard({ pad: 20 }) {
+          Column({ space: 18 }) {
+            // 标题行
+            Row() {
+              Text('智能空调')
+                .fontSize(16)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(neu(this.dark).ink)
+              Blank()
+              YqhNeuChip({
+                text: this.isOn(this.stat.acBtn) ? '运行中' : '已关闭',
+                tone: this.isOn(this.stat.acBtn) ? 'accent' : ''
+              })
+            }
+            .width('100%')
+
+            if (!this.isOn(this.stat.acBtn)) {
+              // 关闭态：空环 + OFF
+              YqhNeuRing({ value: 0, diameter: 150, stroke: 12 }) {
+                Column({ space: 4 }) {
+                  Text('OFF')
+                    .fontSize(26)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor(neu(this.dark).inkSub)
+                  Text('空调已关闭')
+                    .fontSize(12)
+                    .fontColor(neu(this.dark).inkSub)
+                }
+              }
+              YqhNeuButton({
+                text: '开启空调',
+                onBtnClick: () => this.apply({ carVin: getCarVin(), acBtn: SWITCH_ON })
+              })
+            } else {
+              // 开启态：温度旋钮 + 两侧微调
+              Row({ space: 10 }) {
+                YqhNeuCircleButton({
+                  icon: '-',
+                  diameter: 46,
+                  onBtnClick: () => this.changeTemp(-TEMP_STEP)
+                })
+                YqhNeuRing({ value: this.tempPercent(), diameter: 150, stroke: 12 }) {
+                  Column({ space: 2 }) {
+                    Text(this.currentTemp() + '℃')
+                      .fontSize(32)
+                      .fontWeight(FontWeight.Bold)
+                      .fontColor(neu(this.dark).ink)
+                    Text('设定温度')
+                      .fontSize(11)
+                      .fontColor(neu(this.dark).inkSub)
+                  }
+                }
+                YqhNeuCircleButton({
+                  icon: '+',
+                  diameter: 46,
+                  onBtnClick: () => this.changeTemp(TEMP_STEP)
+                })
+              }
               .width('100%')
+              .justifyContent(FlexAlign.Center)
 
-            // 温度旋钮 + 两侧微调
-            Row({ space: 12 }) {
-              Button({ type: ButtonType.Circle }) {
-                Text('-')
-                  .fontSize(28)
-                  .fontColor(COLORS.accentDeep)
+              // 循环 / A·C / 除雾
+              Row({ space: 12 }) {
+                YqhNeuCircleButton({
+                  icon: '🔄',
+                  label: '循环',
+                  diameter: 60,
+                  active: this.isOn(this.stat.circulate),
+                  onBtnClick: () => this.apply({
+                    carVin: getCarVin(),
+                    circulate: this.isOn(this.stat.circulate) ? SWITCH_OFF : SWITCH_ON
+                  })
+                })
+                YqhNeuCircleButton({
+                  icon: '❄',
+                  label: 'A/C',
+                  diameter: 60,
+                  active: true,
+                  onBtnClick: () => this.apply({ carVin: getCarVin(), acBtn: SWITCH_OFF })
+                })
+                YqhNeuCircleButton({
+                  icon: '🌫',
+                  label: '除雾',
+                  diameter: 60,
+                  active: this.isOn(this.stat.clearFog),
+                  onBtnClick: () => this.apply({
+                    carVin: getCarVin(),
+                    clearFog: this.isOn(this.stat.clearFog) ? SWITCH_OFF : SWITCH_ON
+                  })
+                })
               }
-              .width(48)
-              .height(48)
-              .borderRadius(24)
-              .backgroundColor(NEU_BG)
-              .shadow({ radius: 6, color: 'rgba(31,35,41,0.12)', offsetX: 2, offsetY: 2 })
-              .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
-              .onClick(() => this.changeTemp(-TEMP_STEP))
-              this.tempDial()
-              Button({ type: ButtonType.Circle }) {
-                Text('+')
-                  .fontSize(28)
-                  .fontColor(COLORS.accentDeep)
-              }
-              .width(48)
-              .height(48)
-              .borderRadius(24)
-              .backgroundColor(NEU_BG)
-              .shadow({ radius: 6, color: 'rgba(31,35,41,0.12)', offsetX: 2, offsetY: 2 })
-              .border({ width: 1, color: 'rgba(255,255,255,0.9)' })
-              .onClick(() => this.changeTemp(TEMP_STEP))
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.Center)
+              .width('100%')
+              .justifyContent(FlexAlign.SpaceEvenly)
 
-            // 循环 / A·C / 除雾
-            Row({ space: 16 }) {
-              this.neuToggle('🔄', '循环', this.isOn(this.stat.circulate), () => {
-                this.apply({
-                  carVin: getCarVin(),
-                  circulate: this.isOn(this.stat.circulate) ? SWITCH_OFF : SWITCH_ON
-                })
-              })
-              this.neuToggle('❄', 'A/C', true, () => {
-                this.apply({ carVin: getCarVin(), acBtn: SWITCH_OFF })
-              })
-              this.neuToggle('🌫', '除雾', this.isOn(this.stat.clearFog), () => {
-                this.apply({
-                  carVin: getCarVin(),
-                  clearFog: this.isOn(this.stat.clearFog) ? SWITCH_OFF : SWITCH_ON
-                })
+              YqhNeuButton({
+                text: '关闭空调',
+                primary: false,
+                btnHeight: 44,
+                onBtnClick: () => this.apply({ carVin: getCarVin(), acBtn: SWITCH_OFF })
               })
             }
-            .width('100%')
-            .justifyContent(FlexAlign.SpaceAround)
-
-            YqhButton({
-              text: '关闭空调',
-              primary: false,
-              btnHeight: 40,
-              onBtnClick: () => this.apply({ carVin: getCarVin(), acBtn: SWITCH_OFF })
-            })
           }
         }
       }

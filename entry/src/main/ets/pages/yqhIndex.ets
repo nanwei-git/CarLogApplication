@@ -1,6 +1,8 @@
-// 首页枢纽（M1 骨架）：根 Navigation + NavPathStack + 底部 Tabs（首页/车控/反馈/我的）
-// 列表→详情后续里程碑通过 navPathStack.pushPath 走 NavDestination（C5 已裁决）。
-import { COLORS, BG_GRADIENT } from '../common/style/Style'
+// 首页枢纽（Dark Neumorphism）：根 Navigation + NavPathStack + 底部拟态 Tab 栏
+// 列表→详情走 navPathStack.pushPath 渲染 NavDestination（C5）。
+import { neu, neuBg } from '../common/style/Style'
+import { YqhNeuTabItem } from '../common/ui/yqhNeuTabItem'
+import { YqhNeuCircleButton } from '../common/ui/yqhNeuCircleButton'
 import { YqhCarInfoComp } from '../views/comps/yqhCarInfoComp'
 import { YqhAirConditionComp } from '../views/comps/yqhAirConditionComp'
 import { YqhControl } from './yqhControl'
@@ -13,13 +15,17 @@ import { YqhMall } from './yqhMall'
 import { YqhMallDetail } from './yqhMallDetail'
 import { YqhLog } from './yqhLog'
 
+// 底部 Tab（图标用系统符号字符，零美术资产）
+const TAB_TITLES: string[] = ['首页', '车辆控制', '反馈', '我的']
+const TAB_ICONS: string[] = ['🏠', '🎛', '💬', '👤']
+
 @Entry
 @Component
 struct YqhIndex {
+  @StorageProp('darkMode') dark: boolean = true
   @Provide('navPathStack') navPathStack: NavPathStack = new NavPathStack()
   @State currentIndex: number = 0
 
-  // 详情页路由表（M2+ 按 name 渲染各 NavDestination）
   // 详情页路由表（C5：列表→详情走 NavDestination 子页）
   @Builder
   pageMap(name: string, param: Object) {
@@ -61,13 +67,36 @@ struct YqhIndex {
     }
   }
 
+  // 首页顶栏：标题 + 操控日志入口
   @Builder
-  tabBarBuilder(title: string, index: number) {
-    Column({ space: 4 }) {
-      Text(title)
-        .fontSize(14)
-        .fontColor(index === this.currentIndex ? COLORS.accentDeep : COLORS.inkSub)
+  topBar() {
+    Row() {
+      Column({ space: 2 }) {
+        Text('我的爱车')
+          .fontSize(22)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(neu(this.dark).ink)
+        Text('轻松驾驭 · 快乐出行')
+          .fontSize(11)
+          .fontColor(neu(this.dark).inkSub)
+      }
+      .alignItems(HorizontalAlign.Start)
+      Blank()
+      YqhNeuCircleButton({
+        icon: '📋',
+        diameter: 48,
+        onBtnClick: () => {
+          this.navPathStack.pushPath({ name: 'Log' })
+        }
+      })
     }
+    .width('100%')
+    .padding({ left: 8, right: 8 })
+  }
+
+  @Builder
+  tabBarBuilder(icon: string, title: string, index: number) {
+    YqhNeuTabItem({ icon: icon, title: title, active: index === this.currentIndex })
   }
 
   build() {
@@ -75,37 +104,17 @@ struct YqhIndex {
       Tabs({ barPosition: BarPosition.End }) {
         TabContent() {
           Scroll() {
-            Column() {
-              Row() {
-                Text('我的爱车')
-                  .fontSize(20)
-                  .fontWeight(FontWeight.Bold)
-                  .fontColor(COLORS.ink)
-                Blank()
-                Row() {
-                  Text('📋')
-                    .fontSize(18)
-                    .fontColor(COLORS.ink)
-                }
-                .width(36)
-                .height(36)
-                .borderRadius(18)
-                .backgroundColor('rgba(255,255,255,0.7)')
-                .justifyContent(FlexAlign.Center)
-                .onClick(() => {
-                  this.navPathStack.pushPath({ name: 'Log' })
-                })
-              }
-              .width('100%')
-              .padding({ left: 4, right: 4 })
+            Column({ space: 4 }) {
+              this.topBar()
               YqhCarInfoComp()
               YqhAirConditionComp()
             }
             .width('100%')
+            .padding({ bottom: 24 })
           }
           .width('100%')
           .height('100%')
-        }.tabBar(this.tabBarBuilder('首页', 0))
+        }.tabBar(this.tabBarBuilder(TAB_ICONS[0], TAB_TITLES[0], 0))
 
         TabContent() {
           Scroll() {
@@ -113,23 +122,25 @@ struct YqhIndex {
           }
           .width('100%')
           .height('100%')
-        }.tabBar(this.tabBarBuilder('车辆控制', 1))
+        }.tabBar(this.tabBarBuilder(TAB_ICONS[1], TAB_TITLES[1], 1))
 
         TabContent() {
           YqhFeedback()
-        }.tabBar(this.tabBarBuilder('反馈', 2))
+        }.tabBar(this.tabBarBuilder(TAB_ICONS[2], TAB_TITLES[2], 2))
 
         TabContent() {
           YqhMine()
-        }.tabBar(this.tabBarBuilder('我的', 3))
+        }.tabBar(this.tabBarBuilder(TAB_ICONS[3], TAB_TITLES[3], 3))
       }
       .onSelected((val: number) => {
         this.currentIndex = val
       })
+      .barHeight(78)
+      .barBackgroundColor(Color.Transparent)
       .backgroundColor(Color.Transparent)
     }
     .navDestination(this.pageMap)
     .title('杨庆鸿的车主App')
-    .linearGradient(BG_GRADIENT)
+    .linearGradient(neuBg(this.dark))
   }
 }

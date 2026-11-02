@@ -34,7 +34,7 @@ PersistentStorage.persistProp(StorageKeys.carVin, '')
 PersistentStorage.persistProp(StorageKeys.carId, '')
 PersistentStorage.persistProp(StorageKeys.avatar, '')
 PersistentStorage.persistProp(StorageKeys.fontScale, 1.0)
-PersistentStorage.persistProp(StorageKeys.darkMode, false)
+PersistentStorage.persistProp(StorageKeys.darkMode, true)
 
 export function getIsLogin(): boolean {
   return AppStorage.get(StorageKeys.isLogin) as boolean
@@ -98,5 +98,5 @@ export function setDarkMode(v: boolean): void {
   AppStorage.setOrCreate(StorageKeys.darkMode, v)
 }
 export function getDarkMode(): boolean {
-  return (AppStorage.get(StorageKeys.darkMode) as boolean) ?? false
+  return (AppStorage.get(StorageKeys.darkMode) as boolean) ?? true
 }
