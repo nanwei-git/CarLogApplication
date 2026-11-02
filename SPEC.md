@@ -37,7 +37,7 @@
 
 ---
 
-## 2. 模块划分（文件名 / 职责 / 预估行数，总计 ≈ 4800 行，< 5000）
+## 2. 模块划分（文件 / 职责 / 实测行数；车主 App 部分 ≈ 4250 行，不含课堂作业 3094 行）
 
 工程采用 Stage 模型 + MVVM 目录（参考华为官方 ArkTS-MVVM，**遵循既有 `yqhapplication` 代码规范**：struct 带 `yqh` 前缀、组件 `XxxCom.ets`/`Xxx.ets`、`@kit` 导入、`AppStorage`+`PersistentStorage` 持久化、根 `Navigation`+`NavPathStack`+`Tabs` 导航、集中 `Style.ets` 令牌）。
 
@@ -52,8 +52,8 @@
 | `entry/src/main/ets/entryability/EntryAbility.ets` | 50 | Ability 生命周期；冷启动进入 `pages/yqhWelcome` | 改启动/权限 |
 | **视图 · 页面**（`pages/`，共 14 个车主页） | | | |
 | `pages/yqhWelcome.ets` | 59 | 欢迎页：拟态品牌环 + 标语，3s 后按 `isLogin` 分流 | 改欢迎页 |
-| `pages/yqhLogin.ets` | 198 | 登录：账号密码→`getLogin`→存 token→`getUserInfo` 判 carVin→绑车/首页；401 内联红字 | 改登录 |
-| `pages/yqhRegister.ets` | 157 | 注册：两次密码一致校验、必填校验、调用 `getRegister` | 改注册 |
+| `pages/yqhLogin.ets` | 200 | 登录：账号密码→`getLogin`→存 token→`getUserInfo` 判 carVin→绑车/首页；401 内联红字 | 改登录 |
+| `pages/yqhRegister.ets` | 159 | 注册：两次密码一致校验、必填校验、调用 `getRegister` | 改注册 |
 | `pages/yqhBindCar.ets` | 132 | 绑车/换绑：VIN 校验→`bindCarByVin`→回首页（`from=mine` 时 back） | 改绑车 |
 | `pages/yqhIndex.ets` | 142 | 根 `Navigation`+`NavPathStack`+`Tabs` 枢纽：四个 Tab（首页/车辆控制/反馈/我的）；`pageMap` 挂 7 个子页（C5） | 改导航 / 加子页 |
 | `pages/yqhControl.ets` | 231 | 车控：十字方向键（按住移动/松开停车）+ 车门/车灯/空调圆键（4.6/4.8） | 改车控 |
@@ -225,6 +225,8 @@ export interface BindReq { carVin: string; }
 | **C6** 课程交付物 | 须提交实验报告 + 演示视频 mp4 + 源码压缩 | SPEC 仅覆盖代码 | 范围外 | 报告/视频由你按模板另行完成；我可后续协助生成报告大纲/自检清单 |
 | **C7** SDK/API 版本 | 未指定具体版本（按教学环境） | 默认 HarmonyOS NEXT（API 12+）Stage 模型 | 已裁决（取最新） | 已裁决：用最新 API 12+（NEXT） |
 | **C8** 路由策略 | 欢迎/注册/登录用 `@ohos.router`（须 `@Entry`）；模块内/跨模块用 `Navigation` | 欢迎/登录/注册/绑车用 router；首页 Tab 用 Tabs；页内跳转用 Navigation | 一致 | 无需裁决（与指导书一致，记录备查） |
+| **C9** 视觉风格 | 未指定（只要求原创、体现个人信息） | 用户改选 **Dark Neumorphism（特斯拉风深色拟态）**，取代原「用户色卡」与「暗色玻璃」 | 用户最新裁决 | 已裁决：按 Figma 社区稿靶心落地（见 §5 / `DECISIONS.md` D1） |
+| **C10** 车主商城入口（C4） | 4.7.3 要求自定义功能可演示 | 商城列表 + 详情已写好，但没有任何页面能跳转过去 | **内部缺陷** | **待裁决**：A「我的」页加一行「车主商城」 / B 首页顶栏加图标 / C 保持现状；推荐 A |
 
 > 其余与指导书一致项（MVVM 分层、Preferences 持久化键名、请求封装 BASE_URL/Authorization/401 处理、aboutToAppear 取数、KT9/KT10 双选等）不列入冲突。
 
@@ -236,37 +238,46 @@ export interface BindReq { carVin: string; }
 
 1. **导入（API 12+ `@kit` 体系）**：`import { http } from '@kit.NetworkKit'`、`import { router, promptAction } from '@kit.ArkUI'`、`import App from '@system.app'`。
 2. **命名**：
-   - 页面 `@Entry @Component struct YqhXxx`（如 `YqhLogin`/`YqhIndex`/`YqhWelcome`，PascalCase + `Yqh` 前缀），文件 `pages/yqhcar/yqhXxx.ets`。
+   - 页面 `@Entry @Component struct YqhXxx`（如 `YqhLogin`/`YqhIndex`/`YqhWelcome`，PascalCase + `Yqh` 前缀），文件 `pages/yqhXxx.ets`（业务组件 `views/comps/yqhXxxComp.ets`，通用控件 `common/ui/yqhNeuXxx.ets`）。
    - 组件 `@Component`（跨文件导入时 `export struct`），文件 `XxxCom.ets` 或 `Xxx.ets`（如 `MineCom.ets`、`LoginCom.ets`、`SwipeArea.ets`）；同文件内子组件可直接定义（如 `MyRegisterPage.ets` 内 `SignupModule`/`SignupButton`）。
-   - 模型 `class Xxx`（如 `LoginModel`、`Feedback`）；类型/常量集中放 `common/model`、`common/constants`。
+   - 模型 `class Xxx`（如 `LoginModel`、`Feedback`）；Bean 与请求体集中放 `model/`，接口函数放 `viewmodel/`，常量放 `common/constants/`。
    - 全局态键：模块顶部 `PersistentStorage.persistProp('userName','')`；组件内 `@StorageProp('userName')` 只读、`@StorageLink` 双向。
 3. **导航（C5，且与 `newtabsPage.ets` 一致）**：根 `@Entry` 页 `@Provide('navPathStack') navPathStack: NavPathStack = new NavPathStack()`；`@Builder pageMap(name, param)` 用 `if/else` 渲染各 `NavDestination(){...}.title(...)`；`build(){ Navigation(this.navPathStack){ Tabs({barPosition:BarPosition.End}){ TabContent(){...}.tabBar(...) } }.navDestination(this.pageMap) }`。列表→详情：`navPathStack.pushPath({name:'XxxDetail', param: obj})`，详情页 `param as Xxx`。底部四个 Tab：首页/车控/反馈/我的。
 4. **路由（页面级）**：`router.pushUrl({url, params})` / `router.replaceUrl` / `router.back()` / `router.getParams()`；欢迎/登录/注册/绑车用 router。
-5. **HTTP**：集中 `common/constants/HttpApi.ets` 放 `BaseUrl` + 各接口路径（`BaseUrl + '/app/login'` 风格）；`http.createHttp()` → `request(url,{method,header,extraData},(err,data)=>{...})`，结束 `httpRequest.destroy()`；成功判 `data.responseCode === http.ResponseCode.OK` 后 `JSON.parse(data.result as string)`。`RequestUtil.ets` 封装为 Promise（`get/post/put/delete`），统一带 `Authorization`、判 `code==200`、401 回登录；`USE_MOCK` 时走 `MockData.ets`。
+5. **HTTP**：集中 `common/constants/HttpApi.ets` 放 `BaseUrl` + 各接口路径（`BaseUrl + '/app/login'` 风格）；`http.createHttp()` → `request(url,{method,header,extraData},(err,data)=>{...})`，结束 `httpRequest.destroy()`；成功判 `data.responseCode === http.ResponseCode.OK` 后 `JSON.parse(data.result as string)`。`common/utils/RequestUtil.ets` 封装为 Promise（**实际只实现 `post`**，后端全 POST），统一带 `Authorization: Bearer <token>`（未登录时不带）、HTTP 401 清态回登录；`USE_MOCK` 时走 `MockData.ets`。请求与响应用 `hilog`（tag `yqhHttp`）落日志。
 6. **状态/持久化（KT7/KT10）**：用 `AppStorage` + `PersistentStorage`（既有 `MyLoginPage.ets`/`MineCom.ets` 范式）——**未采纳**指导书示例的 `preferences.getPreferencesSync` 写法，但底层同为"用户首选项"，且更贴合本工程既有规范。
-7. **样式（用户色卡已裁决，覆盖先前暗色玻璃风）**：集中 `common/style/Style.ets` 导出 `COLORS`（ColorToken）与渐变令牌，取值取自用户色卡（奶油黄→薄荷青）：
-   - `BG_GRADIENT = ['#FDF6DC', '#E9F5DA', '#C8F0E4', '#BFF0EC']`（纵向线性渐变背景）
-   - `COLORS.card = 'rgba(255,255,255,0.82)'`（半透明白卡）、`COLORS.line = 'rgba(255,255,255,0.65)'`（细描边）
-   - `COLORS.ink = '#2F4F49'`（正文）、`COLORS.inkSub = '#6E8B85'`（次级文字）
-   - `COLORS.accent = '#3FB9A2'`（薄荷主色，按钮/选中态）、`COLORS.accentDeep = '#2E9E8A'`（按压/强调）
-   - `COLORS.highlight = '#F6E7A9'`（奶油黄高亮/优惠标签）、`COLORS.danger = '#E58A8A'`（删除/警示）
-   背景 `Stack`+线性渐变，卡片 `Column` 半透明白 + `blur` 轻毛玻璃 + 细白描边；正文一律深墨绿，保证浅底对比度。
-8. **图标（零美术资产）**：用 `SymbolGlyph`（系统符号，无图片文件）替代既有 `Image($r('app.media.*'))`；头像用 `SymbolGlyph` 或字母圆形占位。
+7. **样式（M9 已改：Dark Neumorphism，覆盖先前的用户色卡与暗色玻璃风）**：集中 `common/style/Style.ets` 导出拟态令牌 `NEU_DARK` / `NEU_LIGHT`，取值函数 `neu(dark)` / `neuBg(dark)`：
+   - `bg0..bg3 = '#23272C' → '#191C20'`（`neuBg()` 纵向渐变，页面根容器统一使用）
+   - `surface = '#22262B'`（卡片与背景同色）、`surfaceRaised = '#282D33'`（内圈高光面）、`surfaceSunken = '#181B1F'`（按下态 / 轨道）
+   - `accent = '#E82127'`（特斯拉红）、`accentDeep = '#FF6A6A'`、`accentSoft = 'rgba(232,33,39,0.30)'`（激活态发光）
+   - `ink = '#EAEEF3'`（正文）、`inkSub = '#8B949F'`（次级）、`line = 'rgba(255,255,255,0.06)'`（细描边）
+   - `shadowDark = 'rgba(0,0,0,0.70)'`（右下暗影）、`shadowLight = 'rgba(255,255,255,0.055)'`（左上亮边）
+   - 几何常量在 `Constants.ets`：`NEU_DISTANCE`6 / `NEU_DISTANCE_SM`4 / `NEU_BLUR`12 / `NEU_BLUR_SM`8 / `NEU_BLUR_GLOW`16 / `NEU_RADIUS`24 / `NEU_RADIUS_SM`16
+   凸起 = 暗影右下 + 亮边左上；凹陷 = 反过来 + 内深色面。**页面一律用 `neu(this.dark)` 取值，禁止写死色值**。旧色卡令牌 `COLORS*` 保留（课堂作业与遗留组件仍在用）。
+8. **图标（M9 已改）**：业务页一律用 **emoji + ArkUI 绘制**（零美术资产，规避 `SymbolGlyph` 在部分 API 版本的兼容问题）；仅车辆底图 `bg_start`/`bg_owner_car` 与控制图标 `ic_door_lock`/`ic_light_open` 沿用既有 4 个 media 图片；头像用字母圆形占位（凹陷面），不新增任何 media 资源。
 9. **注释/格式**：2 空格缩进；中文注释 `// `（可编号 `// 1、`）；链式修饰符分行；字符串单引号；组件可加 `@Preview`；Toast 用 `promptAction.showToast({message, duration})`。
-10. **入口/注册**：启动页 `pages/yqhcar/yqhWelcome` 置 `main_pages.json` 首项；`module.json5` 已含 `ohos.permission.INTERNET`；应用名在 `string.json` 设 `EntryAbility_label = 杨庆鸿的车主App`（C1）。既有 `leson*` 草稿保留不删，隔离在 `pages/yqhcar` 之外。
-11. **UI 组件库（封存复用，用户指令）**：所有通用 UI 控件一律封装为独立、可复用组件，集中放在 `entry/src/main/ets/common/ui/`（或 `pages/yqhcar/widgets/`），做到"封存好、随用随调"——每个组件 `@Component`（可加 `@Preview`），通过 `@Prop/@Link/@BuilderParam` 入参定制，不写死业务数据；业务页只做组装、不重复内联样式。首批沉淀：`YqhGlassCard`（半透明玻璃卡）、`YqhButton`（主/次按钮，薄荷主色）、`YqhToggle`（开关）、`YqhSlider`、`YqhAvatar`（字母/SymbolGlyph 头像）、`YqhEmpty`/`YqhLoading`、`YqhDialog`、`YqhTabBar`（底部 Tab 栏）。色卡令牌统一引 `Style.ets`。
+10. **入口/注册**：启动页 `pages/yqhWelcome` 置 `main_pages.json` 首项；`module.json5` 已含 `ohos.permission.INTERNET`；应用名在 `string.json` 设 `EntryAbility_label = 杨庆鸿的车主App`（C1）。既有 `leson*` 草稿保留不删，课堂作业区（`pages/leson*`、`pages/zuoye*`、`pages/login`、`pages/Perferences`、`pages/Index.ets`）只读不改。
+11. **UI 组件库（M9 已换为拟态组件，业务页只组装）**：所有通用 UI 控件一律封装为独立、可复用组件，集中放在 `entry/src/main/ets/common/ui/`，命名 `yqhNeuXxx.ets`，做到"封存好、随用随调"——每个组件 `@Component`（可加 `@Preview`），通过 `@Prop/@Link/@BuilderParam` 入参定制，不写死业务数据；业务页只做组装、不重复内联样式。当前 7 个：`YqhNeuCard`（拟态卡片，凸起/凹陷）、`YqhNeuButton`（主/次按钮）、`YqhNeuCircleButton`（圆形快捷键：凸起→按下凹陷微缩→激活发光）、`YqhNeuRing`（环形表盘）、`YqhNeuToggle`（开关行）、`YqhNeuTabItem`（底部 Tab 项）、`YqhNeuChip`（状态徽标）。色值/阴影一律引 `Style.ets` 的 `neu(dark)`。
 
-### 8.1 与既有代码 / 指导书的细微差异（已主动裁定，优先级：硬约束 > 指导书 > 既有代码）
+### 8.1 与既有代码 / 指导书的细微差异（已主动裁定，优先级：用户最新裁决 > 硬约束 > 指导书 > 既有代码）
 
-- **图标**：既有用 `Image($r('app.media.*'))` 图片；因"零美术资产"硬约束，**改用 `SymbolGlyph`**，不新增任何图片资源。
+- **视觉主题**：用户最新裁决为 **Dark Neumorphism（特斯拉风深色拟态）**；早先的"用户色卡（奶油黄→薄荷青）"与"暗色玻璃"均已作废（见 §5 / `DECISIONS.md` D1）。
+- **图标**：既有用 `Image($r('app.media.*'))` 图片；**改用 emoji + ArkUI 绘制**（不用 `SymbolGlyph`，规避 API 版本兼容问题），仅保留 4 个既有 media 图片（车辆底图 ×2、控制图标 ×2），不新增图片资源。
 - **持久化**：既有用 `PersistentStorage`/`AppStorage`（非指导书示例的 `preferences.getPreferencesSync`）；**沿用既有**（它即用户首选项，满足 KT10）。
+- **目录**：MVVM 重构后为 `model/` / `viewmodel/` / `views/comps/` / `pages/`（原计划的 `common/model`、`common/api`、`pages/yqhcar/` 已不存在）。
 - **Toast API**：既有用 `promptAction.openToast`；**改用 `showToast`**（API 12 正确 API）。
 
 ---
 
-## 待确认（已全部裁决，仅保留可选建议）
+## 待确认 / 待办
 
-- mock 默认值（可选）：若真服务器 CORS 不可用需切 mock 排查，登录账号/密码、mock 车辆/反馈数据按合理样例造；你有指定测试账号可告知。
+- **C10 车主商城入口（未裁决）**：商城列表 + 详情已写好，但没有任何页面能跳转过去。
+  - A「我的」页加一行「车主商城」——**推荐**，代价：我的页多一行（现 3 行 → 4 行）
+  - B 首页顶栏加图标——代价：顶栏已有「信息」图标，会挤
+  - C 保持现状——代价：C4 自定义功能演示不到，等于没做
+- **USE_MOCK 回切**：后端 `/app/**` 放行后，把 `common/constants/HttpApi.ets` 的 `USE_MOCK` 改回 `false` 直连验收一遍。
+- **编译验证**：M9 视觉改版只做过静态自检，须在 DevEco Studio 编译 + 模拟器跑一遍（本机无 `hvigorw`/SDK）。
+- mock 数据（可选）：登录账号/密码、车辆/反馈数据按合理样例造；你有指定测试账号可告知。
 
 ---
 
@@ -274,6 +285,7 @@ export interface BindReq { carVin: string; }
 
 - **仓库**：`https://github.com/nanwei-git/CarLogApplication.git`（remote 名 `origin`）。
 - **仓库目录**：DevEco 工程根 `D:\Harmony\yqh24002240002120509`（已迁入并改名，含 `.git`；`SPEC.md` 现位于工程根，与代码同仓）。M1 已 `git init` + 配置 `.gitignore`（忽略 `.hvigor/`、`build/`、`oh_modules/`、`.idea/`、`local.properties` 等）+ `git remote add origin <url>`。
-- **节奏**：每完成一个里程碑（M1–M8）→ `git add` → `git commit -m "M<n>: <可感知行为描述>"` → `git push`（首次 `push -u origin main`，分支名以 init 默认为准）。
+- **节奏**：每完成一个里程碑（M1–M9）→ `git add` → `git commit -m "M<n>: <可感知行为描述>"` → `git push`（首次 `push -u origin main`，分支名以 init 默认为准）。一轮对话 = 一件事 = 一条 commit。
+- **现状**：本地 `main` 曾长期领先 `origin/main`（含 MVVM 重构、P1–P5 原型对齐、M9 视觉改版等），本次一并推送。
 - **凭据**：推送需 GitHub 凭据；若本机凭据管理器可用则静默完成，否则报 403/要求登录，届时我停下并告知你处理，不擅自绕过。
-- `SPEC.md` 现已随工程一并入库（位于工程根 `yqh24002240002120509`），与代码同仓提交，无需单独处理。
+- `SPEC.md` / `CLAUDE.md` / `DECISIONS.md` 均位于工程根 `yqh24002240002120509`，与代码同仓提交，无需单独处理。

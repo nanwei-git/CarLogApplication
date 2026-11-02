@@ -32,7 +32,7 @@ HarmonyOS NEXT 车主 App（ArkTS / ArkUI 声明式，Stage 模型 + MVVM 分层
 | 层 / 目录 | 文件（行） | 职责 |
 |---|---|---|
 | **入口** | `entryability/EntryAbility.ets`（50） | Ability 生命周期，冷启动进 `pages/yqhWelcome` |
-| **页面** `pages/`（14 个） | `yqhWelcome`59、`yqhLogin`198、`yqhRegister`157、`yqhBindCar`132、`yqhIndex`142、`yqhControl`231、`yqhFeedback`242、`yqhFeedbackAdd`109、`yqhFeedbackDetail`104、`yqhLog`82、`yqhMall`150、`yqhMallDetail`158、`yqhMine`167、`yqhSettings`143 | 路由页（欢迎/登录/注册/绑车）+ Tab 页（首页/车辆控制/反馈/我的）+ NavDestination 子页（反馈增删详情、日志、商城、商品详情、设置） |
+| **页面** `pages/`（14 个） | `yqhWelcome`59、`yqhLogin`200、`yqhRegister`159、`yqhBindCar`132、`yqhIndex`142、`yqhControl`231、`yqhFeedback`242、`yqhFeedbackAdd`109、`yqhFeedbackDetail`104、`yqhLog`82、`yqhMall`150、`yqhMallDetail`158、`yqhMine`167、`yqhSettings`143 | 路由页（欢迎/登录/注册/绑车）+ Tab 页（首页/车辆控制/反馈/我的）+ NavDestination 子页（反馈增删详情、日志、商城、商品详情、设置） |
 | **业务组件** `views/comps/` | `yqhCarInfoComp`200、`yqhAirConditionComp`224 | 首页两块：车辆信息卡（环形电量表盘 + 门/灯/空调圆键）、智能空调（环形温度旋钮 + 循环/A·C/除雾） |
 | **通用组件** `common/ui/` | `yqhNeuCard`53、`yqhNeuButton`61、`yqhNeuCircleButton`99、`yqhNeuRing`58、`yqhNeuToggle`55、`yqhNeuTabItem`39、`yqhNeuChip`38 | 拟态组件库：卡片 / 按钮 / 圆键 / 环形表盘 / 开关 / Tab 项 / 徽标。业务页只组装 |
 | **接口函数** `viewmodel/` | `auth`36、`car`49、`feedback`61、`mall`12 | 登录注册绑车、车辆信息状态移动日志、反馈增删查、商城列表收藏 |
