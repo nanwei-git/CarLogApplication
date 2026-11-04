@@ -49,7 +49,7 @@
 | 文件 | 行 | 职责 | 什么时候改它 |
 |---|---|---|---|
 | **入口** | | | |
-| `entry/src/main/ets/entryability/EntryAbility.ets` | 50 | Ability 生命周期；冷启动进入 `pages/yqhWelcome` | 改启动/权限 |
+| `entry/src/main/ets/entryability/EntryAbility.ets` | 53 | Ability 生命周期；冷启动进入 `pages/yqhWelcome`；`onCreate` 调 `initStorage` 初始化用户首选项 | 改启动/权限 |
 | **视图 · 页面**（`pages/`，共 14 个车主页） | | | |
 | `pages/yqhWelcome.ets` | 59 | 欢迎页：拟态品牌环 + 标语，3s 后按 `isLogin` 分流 | 改欢迎页 |
 | `pages/yqhLogin.ets` | 200 | 登录：账号密码→`getLogin`→存 token→`getUserInfo` 判 carVin→绑车/首页；401 内联红字 | 改登录 |
@@ -84,7 +84,7 @@
 | **数据 · 模型**（`model/`） | 284 | `ApiReq`68 / `CarInfoBean`42 / `CarStateBean`36 / `CarLogBean`23 / `FeedBackBean`46 / `MallBean`50 / `UserInfoBean`13 / `IResult`6：请求体 + `parseXxx` 解析 | 加 / 改字段 |
 | **基础设施** | | | |
 | `common/utils/RequestUtil.ets` | 79 | 统一 GET/PUT/POST/DELETE：Bearer 鉴权、响应体 `code===401` 清态跳登录、hilog 埋点 | 改请求 / 错误 |
-| `common/utils/StorageUtils.ets` | 97 | `StorageKeys` + `AppStorage`/`PersistentStorage` 封装（KT10） | 改持久化 |
+| `common/utils/StorageUtils.ets` | 125 | `StorageKeys` + 用户首选项 `preferences`（落盘）+ `AppStorage`（缓存）封装（KT10） | 改持久化 |
 | `common/utils/MockData.ets` | 359 | 与接口字段一致的本地 mock（登录/用户/车辆/状态/反馈/日志/商城），`USE_MOCK=true` 时兜底 | 调 mock |
 | `common/constants/HttpApi.ets` | 56 | `BaseUrl` + 18 条接口路径（/app/login、/system/user/register、/getInfo、/cockpit/**）+ `USE_MOCK` 开关（C2，现状 `false`） | 改接口地址 / 切 mock |
 | `common/constants/Constants.ets` | 47 | 数值表（含 `NEU_*` 拟态几何常量，见 §3） | 调数值 |
@@ -180,7 +180,7 @@ export interface BindReq { carVin: string; }
 - **路由**：欢迎/登录/注册/绑车用 `@ohos.router`（`replaceUrl`，须 `@Entry`）；首页根 `Navigation` 承载底部模块切换（首页/车控/反馈/我的 四个 `NavDestination` + 自定义底部 Tab 栏），页内列表→详情用 `Navigation` 子页（实验指导书推荐，C5 已裁决）。
 - **网络**：`@kit.NetworkKit` 的 `http`（`httpRequest.request`），需 `module.json5` 声明 `ohos.permission.INTERNET`；统一封装于 `common/utils/RequestUtil.ets`（**GET / PUT / POST / DELETE 四方法**，按《接口文档 V1.1》选用），含 `USE_MOCK` 开关（C2 裁决为 `false` 直连真服务器 `BaseUrl`；**现状已为 `false`**，整套 App 直连，接口路径见 `HttpApi.ets`）。服务器恒返回 HTTP 200，成败看响应体 `code`（200 成功 / 401 鉴权 / 500 业务）。请求/响应/耗时用 `hilog`（tag `yqhHttp`）落日志，便于联调。
 - **绑车判据（C3 已裁决）**：登录成功后 `getUserInfo`，仅当 `carVin` 为空才进绑车页，否则进首页（贴合需求文档/流程节点，不判 `carId`）。
-- **持久化（KT10，遵循既有代码规范）**：采用既有 `PersistentStorage.persistProp` + `AppStorage`（`setOrCreate`/`get`/`@StorageProp`/`@StorageLink`）模式，底层即为"用户首选项"；`StorageUtils.ets` 仅封装键名常量，存 token/carVin/carId/userId/userName/avatar/isLogin。**注**：与实验指导书示例的 `preferences.getPreferencesSync` 写法不同，但同为 KT10 持久化，且更贴合本工程既有规范。
+- **持久化（KT10）**：`StorageUtils.ets` 用 `@ohos.data.preferences`（`preferences.getPreferencesSync`，仓库 `CarLogStore`）落盘，存 token/carVin/carId/userId/userName/avatar/isLogin/字号/主题；`AppStorage` 仅作内存响应式缓存，页面经 `@StorageProp/@StorageLink` 读取、写入统一走 `setXxx`（同步双写首选项）。`EntryAbility.onCreate` 用 `this.context` 调 `initStorage(context)` 初始化一次。已显式满足指导书「用户首选项」要求（见 `DECISIONS.md` D5）。
 - **UI 风格（M9 已裁决：Dark Neumorphism 特斯拉风深色拟态，覆盖先前的"用户色卡"与"暗色玻璃"）**：近黑底 `#22262B` + 特斯拉红 `#E82127`；卡片与背景同色，靠「左上亮边 + 右下暗影」双层投影造体积；进度/表盘用凹陷轨道；主按钮红渐变 + 柔光；正文 `#EAEEF3` 保证暗底对比度。**零新增美术资产**（质感全部由 ArkUI 绘制）。拟态令牌见 §8 第 7 条。
 - **图标（M9 已更新）**：业务页一律用 **emoji + ArkUI 绘制**（零美术资产，规避 `SymbolGlyph` 在部分 API 版本的兼容问题）；仅车辆底图 `bg_start`/`bg_owner_car` 与控制图标 `ic_door_lock`/`ic_light_open` 沿用既有 4 个 media 图片；头像用字母圆形占位（凹陷面），不新增任何 media 资源。
 - **命名与目录（遵循既有规范，M9 已同步现况）**：struct 带 `Yqh` 前缀、PascalCase（如 `YqhLogin`/`YqhIndex`）体现原创性；页面文件 `pages/yqhXxx.ets`、业务组件 `views/comps/yqhXxxComp.ets`、通用控件 `common/ui/yqhNeuXxx.ets`；车主 App 页面直接置于 `pages/` 根（课堂作业 `pages/leson*|zuoye*|login|Perferences` 隔离，只读不改）；启动页 `pages/yqhWelcome` 注册为 `main_pages.json` 首项；应用名在 `string.json` 设为 `杨庆鸿的车主App`（C1）。
@@ -252,7 +252,7 @@ export interface BindReq { carVin: string; }
 3. **导航（C5，且与 `newtabsPage.ets` 一致）**：根 `@Entry` 页 `@Provide('navPathStack') navPathStack: NavPathStack = new NavPathStack()`；`@Builder pageMap(name, param)` 用 `if/else` 渲染各 `NavDestination(){...}.title(...)`；`build(){ Navigation(this.navPathStack){ Tabs({barPosition:BarPosition.End}){ TabContent(){...}.tabBar(...) } }.navDestination(this.pageMap) }`。列表→详情：`navPathStack.pushPath({name:'XxxDetail', param: obj})`，详情页 `param as Xxx`。底部四个 Tab：首页/车控/反馈/我的。
 4. **路由（页面级）**：`router.pushUrl({url, params})` / `router.replaceUrl` / `router.back()` / `router.getParams()`；欢迎/登录/注册/绑车用 router。
 5. **HTTP**：集中 `common/constants/HttpApi.ets` 放 `BaseUrl` + 各接口路径（如 `BaseUrl + '/app/login'`、`BaseUrl + '/cockpit/info/{id}'` 等，详见 `HttpApi.ets`）；`http.createHttp()` → `request(url,{method,header,extraData},(err,data)=>{...})`，结束 `httpRequest.destroy()`；成功判 `data.responseCode === http.ResponseCode.OK` 后 `JSON.parse(data.result as string)`。`common/utils/RequestUtil.ets` 封装为 Promise（**GET/PUT/POST/DELETE 四方法**，按接口文档选用**），统一带 `Authorization: Bearer <token>`（未登录时不带）、响应体 `code===401` 清态回登录；`USE_MOCK` 时走 `MockData.ets`。请求与响应用 `hilog`（tag `yqhHttp`）落日志。
-6. **状态/持久化（KT7/KT10）**：用 `AppStorage` + `PersistentStorage`（既有 `MyLoginPage.ets`/`MineCom.ets` 范式）——**未采纳**指导书示例的 `preferences.getPreferencesSync` 写法，但底层同为"用户首选项"，且更贴合本工程既有规范。
+6. **状态/持久化（KT7/KT10）**：`AppStorage`（响应式缓存）+ `@ohos.data.preferences`（用户首选项落盘，仓库 `CarLogStore`），写入统一走 `StorageUtils` 的 `setXxx`，页面经 `@StorageProp/@StorageLink` 绑定。已显式采用指导书示例的 `preferences.getPreferencesSync` 写法，满足 KT10（详见 D5）。
 7. **样式（M9 已改：Dark Neumorphism，覆盖先前的用户色卡与暗色玻璃风）**：集中 `common/style/Style.ets` 导出拟态令牌 `NEU_DARK` / `NEU_LIGHT`，取值函数 `neu(dark)` / `neuBg(dark)`：
    - `bg0..bg3 = '#23272C' → '#191C20'`（`neuBg()` 纵向渐变，页面根容器统一使用）
    - `surface = '#22262B'`（卡片与背景同色）、`surfaceRaised = '#282D33'`（内圈高光面）、`surfaceSunken = '#181B1F'`（按下态 / 轨道）
@@ -270,7 +270,7 @@ export interface BindReq { carVin: string; }
 
 - **视觉主题**：用户最新裁决为 **Dark Neumorphism（特斯拉风深色拟态）**；早先的"用户色卡（奶油黄→薄荷青）"与"暗色玻璃"均已作废（见 §5 / `DECISIONS.md` D1）。
 - **图标**：既有用 `Image($r('app.media.*'))` 图片；**改用 emoji + ArkUI 绘制**（不用 `SymbolGlyph`，规避 API 版本兼容问题），仅保留 4 个既有 media 图片（车辆底图 ×2、控制图标 ×2），不新增图片资源。
-- **持久化**：既有用 `PersistentStorage`/`AppStorage`（非指导书示例的 `preferences.getPreferencesSync`）；**沿用既有**（它即用户首选项，满足 KT10）。
+- **持久化**：改用 `@ohos.data.preferences`（`preferences.getPreferencesSync`，仓库 `CarLogStore`）作落盘，`AppStorage` 作响应式缓存；与指导书示例一致，满足 KT10（见 §5 / `DECISIONS.md` D5）。
 - **目录**：MVVM 重构后为 `model/` / `viewmodel/` / `views/comps/` / `pages/`（原计划的 `common/model`、`common/api`、`pages/yqhcar/` 已不存在）。
 - **Toast API**：既有用 `promptAction.openToast`；**改用 `showToast`**（API 12 正确 API）。
 

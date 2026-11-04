@@ -34,20 +34,20 @@ HarmonyOS NEXT 车主 App（ArkTS / ArkUI 声明式，Stage 模型 + MVVM 分层
 
 | 层 / 目录 | 文件（行） | 职责 |
 |---|---|---|
-| **入口** | `entryability/EntryAbility.ets`（50） | Ability 生命周期，冷启动进 `pages/yqhWelcome` |
+| **入口** | `entryability/EntryAbility.ets`（53） | Ability 生命周期，冷启动进 `pages/yqhWelcome`；`onCreate` 调 `initStorage` 初始化用户首选项 |
 | **页面** `pages/`（14 个） | `yqhWelcome`59、`yqhLogin`200、`yqhRegister`159、`yqhBindCar`132、`yqhIndex`142、`yqhControl`232、`yqhFeedback`241、`yqhFeedbackAdd`109、`yqhFeedbackDetail`104、`yqhLog`82、`yqhMall`150、`yqhMallDetail`158、`yqhMine`167、`yqhSettings`143 | 路由页（欢迎/登录/注册/绑车）+ Tab 页（首页/车辆控制/反馈/我的）+ NavDestination 子页（反馈增删详情、日志、商城、商品详情、设置） |
 | **业务组件** `views/comps/` | `yqhCarInfoComp`200、`yqhAirConditionComp`224 | 首页两块：车辆信息卡（环形电量表盘 + 门/灯/空调圆键）、智能空调（环形温度旋钮 + 循环/A·C/除雾） |
 | **通用组件** `common/ui/` | `yqhNeuCard`53、`yqhNeuButton`61、`yqhNeuCircleButton`99、`yqhNeuRing`58、`yqhNeuToggle`55、`yqhNeuTabItem`39、`yqhNeuChip`38 | 拟态组件库：卡片 / 按钮 / 圆键 / 环形表盘 / 开关 / Tab 项 / 徽标。业务页只组装 |
 | **接口函数** `viewmodel/` | `auth`39、`car`78、`feedback`43、`mall`12 | 登录注册绑车、车辆信息状态移动日志、反馈增删查、商城列表收藏 |
 | **模型** `model/` | `ApiReq`68、`CarInfoBean`42、`CarStateBean`36、`CarLogBean`23、`FeedBackBean`46、`MallBean`50、`UserInfoBean`13、`IResult`6 | 请求体 + `parseXxx` 解析 |
-| **基础设施** `common/` | `utils/RequestUtil`79、`utils/StorageUtils`97、`utils/MockData`359、`constants/HttpApi`56、`constants/Constants`47、`style/Style`152 | 统一 GET/PUT/POST/DELETE（Bearer + 401 清态 + hilog）、持久化键（KT10）、本地 mock、接口路径/开关、数值表、设计令牌 |
+| **基础设施** `common/` | `utils/RequestUtil`79、`utils/StorageUtils`125、`utils/MockData`359、`constants/HttpApi`56、`constants/Constants`47、`style/Style`152 | 统一 GET/PUT/POST/DELETE（Bearer + 401 清态 + hilog）、用户首选项(preferences)落盘 + AppStorage 缓存（KT10）、本地 mock、接口路径/开关、数值表、设计令牌 |
 | **遗留（未引用）** `views/` | `yqhGlassCard`20、`yqhButton`29、`yqhToggle`43 | 旧浅色玻璃风组件，车主 App 已不引用，保留待清 |
 | **课堂作业（只读）** | `pages/leson*`、`pages/zuoye*`、`pages/login`、`pages/Perferences`、`pages/Index.ets`（3094） | 课程草稿，隔离区 |
 
 ## 架构要点
 
 - **数据流**：页面 `aboutToAppear` → `viewmodel/xxx` 函数 →（`USE_MOCK` ? `MockData` : `RequestUtil` 统一 GET/PUT/POST/DELETE）→ `model` 的 `parseXxx` → 写入 `@State` 渲染。
-- **状态**：页面内 `@State`；跨页 `@Provide/@Consume('navPathStack')`；应用级 `AppStorage` + `PersistentStorage`（键名集中 `StorageUtils.ets`）。
+- **状态**：页面内 `@State`；跨页 `@Provide/@Consume('navPathStack')`；应用级 `AppStorage`（响应式缓存）+ 用户首选项 `preferences`（落盘，键名集中 `StorageUtils.ets`，`EntryAbility.onCreate` 调 `initStorage`）。
 - **导航分工（C5）**：欢迎/登录/注册/绑车用 `@ohos.router`（须 `@Entry`，注册在 `main_pages.json`）；首页用根 `Navigation` + `NavPathStack` + `Tabs`（4 个 Tab），详情用 `pushPath` 渲染 `NavDestination`。
   子页名：`Log`、`FeedbackAdd`、`FeedbackList`、`FeedbackDetail`、`Settings`、`Mall`、`MallDetail`。
 - **鉴权**：token 存 `AppStorage('token')`，`RequestUtil` 带 `Bearer <token>`；HTTP 401（响应体 `code===401`）→ `clearSession()` + 跳登录页。

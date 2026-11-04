@@ -30,10 +30,11 @@
 - **理由**：后端已开放联调；按需求「整套 app 都直连真服务器」全量置 false，`MockData.ets` 仅作离线兜底。
 - **影响**：SPEC §3 现与现状一致（默认直连）。联调结论：服务器恒返回 HTTP 200，成败看响应体 `code`（200 成功 / 401 鉴权 / 500 业务）。**本条目已结案**。
 
-## D5 · 持久化沿用 AppStorage + PersistentStorage（KT10）
+## D5 · 持久化改用用户首选项 preferences（KT10，已落地）
 
-- **决策**：不用指导书示例的 `preferences.getPreferencesSync`，沿用既有的 `PersistentStorage.persistProp` + `AppStorage`，键名集中 `StorageUtils.ets`。
-- **理由**：底层同为「用户首选项」，满足 KT10，且贴合本工程既有规范。
+- **决策**：`StorageUtils.ets` 用 `@ohos.data.preferences`（`preferences.getPreferencesSync`，仓库名 `CarLogStore`）落盘存储 token / 字号 / 主题 / 用户与车辆信息；`AppStorage` 仅作内存响应式缓存层，页面经 `@StorageProp/@StorageLink` 读取，写入统一走 `setXxx`（同步双写首选项）。
+- **理由**：明确满足课程 KT10「使用用户首选项实现数据持久化」的要求（此前用 `PersistentStorage`，其底层虽也是首选项但写法不直接显式）。`EntryAbility.onCreate` 用 `this.context` 调 `initStorage(context)` 初始化一次。
+- **影响**：所有 `setXxx` 现在同步双写 AppStorage + 用户首选项；读取仍走 AppStorage，UI 绑定不变。字段与函数签名完全兼容，页面零改动。
 
 ## D6 · 导航分工：router 做入口，Navigation 做壳内跳转
 
