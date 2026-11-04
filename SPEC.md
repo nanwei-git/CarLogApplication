@@ -77,16 +77,16 @@
 | `common/ui/yqhNeuTabItem.ets` | 39 | 底部 Tab 项（选中凹陷 + 主色） | 改 Tab |
 | `common/ui/yqhNeuChip.ets` | 38 | 状态徽标（accent/ok/warn/danger） | 改徽标 |
 | **数据 · 接口函数**（`viewmodel/`） | | | |
-| `viewmodel/auth.ets` | 36 | 登录 / 注册 / 用户信息 / 绑车 | 改鉴权接口 |
-| `viewmodel/car.ets` | 49 | 车辆信息 / 状态 / 状态变更 / 移动 / 操作日志 | 改车辆接口 |
-| `viewmodel/feedback.ets` | 61 | 反馈列表 / 新增 / 详情 / 删除 | 改反馈接口 |
+| `viewmodel/auth.ets` | 39 | 登录 / 注册 / 用户信息 / 绑车 | 改鉴权接口 |
+| `viewmodel/car.ets` | 78 | 车辆信息 / 状态 / 状态变更(PUT) / 移动 / 操作日志 / 独立车门·车灯控制 | 改车辆接口 |
+| `viewmodel/feedback.ets` | 43 | 反馈列表(数组) / 新增 / 详情 / 删除 | 改反馈接口 |
 | `viewmodel/mall.ets` | 12 | 商城列表 / 收藏（本地 mock） | 改商城接口 |
-| **数据 · 模型**（`model/`） | 285 | `ApiReq`61 / `CarInfoBean`50 / `CarStateBean`36 / `CarLogBean`23 / `FeedBackBean`46 / `MallBean`50 / `UserInfoBean`13 / `IResult`6：请求体 + `parseXxx` 解析 | 加 / 改字段 |
+| **数据 · 模型**（`model/`） | 284 | `ApiReq`68 / `CarInfoBean`42 / `CarStateBean`36 / `CarLogBean`23 / `FeedBackBean`46 / `MallBean`50 / `UserInfoBean`13 / `IResult`6：请求体 + `parseXxx` 解析 | 加 / 改字段 |
 | **基础设施** | | | |
-| `common/utils/RequestUtil.ets` | 57 | 统一 POST：Bearer 鉴权、HTTP 401 清态跳登录、hilog 埋点 | 改请求 / 错误 |
+| `common/utils/RequestUtil.ets` | 79 | 统一 GET/PUT/POST/DELETE：Bearer 鉴权、响应体 `code===401` 清态跳登录、hilog 埋点 | 改请求 / 错误 |
 | `common/utils/StorageUtils.ets` | 97 | `StorageKeys` + `AppStorage`/`PersistentStorage` 封装（KT10） | 改持久化 |
-| `common/utils/MockData.ets` | 360 | 与接口字段一致的本地 mock（登录/用户/车辆/状态/反馈/日志/商城） | 调 mock |
-| `common/constants/HttpApi.ets` | 39 | `BaseUrl` + 12 条接口路径 + `USE_MOCK` 开关（C2） | 改接口地址 / 切 mock |
+| `common/utils/MockData.ets` | 359 | 与接口字段一致的本地 mock（登录/用户/车辆/状态/反馈/日志/商城），`USE_MOCK=true` 时兜底 | 调 mock |
+| `common/constants/HttpApi.ets` | 56 | `BaseUrl` + 18 条接口路径（/app/login、/system/user/register、/getInfo、/cockpit/**）+ `USE_MOCK` 开关（C2，现状 `false`） | 改接口地址 / 切 mock |
 | `common/constants/Constants.ets` | 47 | 数值表（含 `NEU_*` 拟态几何常量，见 §3） | 调数值 |
 | `common/style/Style.ets` | 152 | 设计令牌：`NEU_DARK`/`NEU_LIGHT` + `neu()`/`neuBg()`（另保留旧 `COLORS` 色卡） | 改主题 |
 | `entry/src/main/module.json5` + `resources/base/profile/main_pages.json` + `resources/base/element/string.json` | — | INTERNET 权限、22 个页面注册（启动页 `yqhWelcome` 首项）、应用名 `杨庆鸿的车主App`、字符串资源 | 改权限 / 注册 |
@@ -106,7 +106,7 @@
 |---|---|---|---|
 | 欢迎页自动跳转 | `WELCOME_MS` | 3000 | 到时按登录态分流 |
 | 接口基地址 | `BASE_URL` | `http://121.36.14.143:10001` | 真服务器 |
-| Mock 开关 | `USE_MOCK` | **`true`（现状）** / 目标 `false` | 目标值仍为直连真服务器（C2 裁决）；现状因后端 `/app/**` 尚返回业务码 401 而置 `true`，后端放行后改回即可 |
+| Mock 开关 | `USE_MOCK` | **`false`（现状，已直连真服务器）** | 整套 App 已直连真服务器 `BaseUrl`；`MockData.ets` 仅作离线兜底（D4 / D12） |
 | 请求软超时提示阈值 | `API_WARN_MS` | 2000 | 评分要求响应 <2s，超则 toast |
 | Toast 时长 | `TOAST_MS` | 2000 | |
 | 日志分页大小 | `LOG_PAGE_SIZE` | 10 | 接口 `pageSize` |
@@ -141,7 +141,7 @@ export class User { userId: string=''; nickName=''; userName=''; phonenumber='';
 
 // CarInfoBean.ets（接口4.5 data）
 export class CarInfoBean {
-  id=''; carName=''; brand=''; carVin=''; batteryPower:object={}; enduranceMileage='';
+  id=''; carName=''; brand=''; carVin=''; batteryPower:string=''; enduranceMileage='';  // 接口返回字符串（如 "999"），续航百分比用 Number() 解析
   horsePower=''; maxPower=''; maxTorque=''; carSize=''; wheelBase='';
   batteryCapacity=''; nominalVoltage=''; totalTripNum=0; totalTripMile=''; createYm='';
 }
@@ -154,11 +154,10 @@ export class CarStat {
 }
 export class CarStateChange { carVin=''; acBtn?; circulate?; clearFog?; setTemp?; door?; light?; ... }
 
-// FeedBackBean.ets
-export class FeedBackListBean { total=0; rows: Feedback[] = []; code=0; msg=''; }
+// FeedBackBean.ets（反馈列表接口直接返回 Feedback[] 数组，无外层包装）
 export class Feedback { id=''; userId=''; userName=''; nickName=''; phonenumber=''; content=''; status=''; picUrl=''; delFlag=''; replyRead=''; createTime=''; updateTime=''; reply?: object; }
 
-// MessageInfoBean.ets（接口4.10）
+// MessageInfoBean.ets（接口4.10；响应中 total/rows 在顶层，rows 即日志数组）
 export class MessageInfoBean { total=0; rows: MessageInfo[] = []; code=0; msg=''; }
 export class MessageInfo { id=0; userId=''; userName=''; carId=''; carName=''; operaType=''; operaContent=''; createTime=''; }
 
@@ -179,7 +178,7 @@ export interface BindReq { carVin: string; }
 - **语言/框架**：ArkTS + ArkUI 声明式（HarmonyOS NEXT，Stage 模型）。
 - **架构**：MVVM 分层（`model/` 数据模型 / `viewmodel/` 接口函数 / `common/utils`、`common/constants`、`common/style` 工具 / `pages/` + `views/comps/` + `common/ui/` 视图）；页面级状态 `@State/@Prop/@Link`（KT6），应用级共享 `@Provide/@Consume` + `AppStorage`/`PersistentStorage`（KT7）。**目录已按 MVVM 重构，旧路径 `common/model`、`common/api`、`pages/yqhcar` 已不存在**。
 - **路由**：欢迎/登录/注册/绑车用 `@ohos.router`（`replaceUrl`，须 `@Entry`）；首页根 `Navigation` 承载底部模块切换（首页/车控/反馈/我的 四个 `NavDestination` + 自定义底部 Tab 栏），页内列表→详情用 `Navigation` 子页（实验指导书推荐，C5 已裁决）。
-- **网络**：`@kit.NetworkKit` 的 `http`（`httpRequest.request`），需 `module.json5` 声明 `ohos.permission.INTERNET`；统一封装于 `common/utils/RequestUtil.ets`（只封装了 `post`），含 `USE_MOCK` 开关（C2 裁决目标为 `false` 直连真服务器 `BaseUrl`；**现状为 `true`**，因后端 `/app/**` 返回业务码 401，放行后改回）。请求/响应/耗时用 `hilog`（tag `yqhHttp`）落日志，便于联调。
+- **网络**：`@kit.NetworkKit` 的 `http`（`httpRequest.request`），需 `module.json5` 声明 `ohos.permission.INTERNET`；统一封装于 `common/utils/RequestUtil.ets`（**GET / PUT / POST / DELETE 四方法**，按《接口文档 V1.1》选用），含 `USE_MOCK` 开关（C2 裁决为 `false` 直连真服务器 `BaseUrl`；**现状已为 `false`**，整套 App 直连，接口路径见 `HttpApi.ets`）。服务器恒返回 HTTP 200，成败看响应体 `code`（200 成功 / 401 鉴权 / 500 业务）。请求/响应/耗时用 `hilog`（tag `yqhHttp`）落日志，便于联调。
 - **绑车判据（C3 已裁决）**：登录成功后 `getUserInfo`，仅当 `carVin` 为空才进绑车页，否则进首页（贴合需求文档/流程节点，不判 `carId`）。
 - **持久化（KT10，遵循既有代码规范）**：采用既有 `PersistentStorage.persistProp` + `AppStorage`（`setOrCreate`/`get`/`@StorageProp`/`@StorageLink`）模式，底层即为"用户首选项"；`StorageUtils.ets` 仅封装键名常量，存 token/carVin/carId/userId/userName/avatar/isLogin。**注**：与实验指导书示例的 `preferences.getPreferencesSync` 写法不同，但同为 KT10 持久化，且更贴合本工程既有规范。
 - **UI 风格（M9 已裁决：Dark Neumorphism 特斯拉风深色拟态，覆盖先前的"用户色卡"与"暗色玻璃"）**：近黑底 `#22262B` + 特斯拉红 `#E82127`；卡片与背景同色，靠「左上亮边 + 右下暗影」双层投影造体积；进度/表盘用凹陷轨道；主按钮红渐变 + 柔光；正文 `#EAEEF3` 保证暗底对比度。**零新增美术资产**（质感全部由 ArkUI 绘制）。拟态令牌见 §8 第 7 条。
@@ -207,9 +206,17 @@ export interface BindReq { carVin: string; }
 > M1–M9 每个只交付"一个玩家能感知的行为变化"，对应一条 commit + 一句英文行为描述（见 AI-WORKFLOW 收尾规范）。
 > **进度**：M1–M9 均已完成并入 git；当前处在 S6 交付（文档齐全 + 推送 GitHub）。
 > **遗留**：车主商城（M8b）页面已写好但**没有入口**，见 §7 C10 与 `DECISIONS.md` D9。
-> **编译提醒**：改动只做过静态自检，编译与运行须在 DevEco Studio（本机无 `hvigorw`/SDK 命令行环境）。
+> **编译提醒**：本机已可用命令行构建（设 `DEVECO_SDK_HOME` 后执行 `hvigorw.js assembleHap`，已验证 `BUILD SUCCESSFUL`）；运行仍回 DevEco Studio/模拟器（见 `DECISIONS.md` D11）。
 
 ---
+
+## 6.1 联调测试套件（tests/，Python unittest）
+
+- **目的**：服务器开放后，按阶段对每个后端接口做 HTTP 契约集成测试（断言路径 / 方法 / 鉴权 / 响应结构），不删 / 不跳 / 不降标。
+- **结构**：`tests/common.py`（统一 `call` 客户端，校验响应体 `code`）+ `test_auth.py`（登录/注册/用户信息/绑车）、`test_car.py`（车辆信息/状态）、`test_control.py`（空调/车门/车灯/移动）、`test_feedback.py`（列表/详情/增删）、`test_logs.py`（列表/删除）+ `run_all.py`。
+- **运行**：全量 `python tests/run_all.py`；单阶段 `python tests/test_auth.py`。
+- **现状**：23 个用例全部通过（HTTP 200 + 响应体 `code===200`），含各接口"无 token 鉴权"负向用例。
+- **说明**：本环境无法跑 ArkUI 真机，故联调以协议级集成测试实现，验证 App 实际使用的请求契约与活服务器完全一致（App 代码已在 `02e5266` 对齐文档 V1.1）。
 
 ## 7. 与实验指导书的冲突 / 差异标注（待你裁决）
 
@@ -218,7 +225,7 @@ export interface BindReq { carVin: string; }
 | 编号 | 实验指导书要求 | SPEC 当前设定 | 性质 | 待你裁决 |
 |---|---|---|---|---|
 | **C1** 工程/应用命名 | 工程名须为"姓名首字母拼音班级学号"；应用名改为"xxx的车主App"（xxx=姓名），需体现个人信息 | 未包含命名规范与个人信息占位 | 已裁决（已补） | 已裁决：工程名 `yqh24002240002120509`、应用名 `杨庆鸿的车主App`、个人 VIN `00661718330`（台架用 `4494356c`） |
-| **C2** 数据来源 | 所有接口直接调用真服务器（`http` 模块），未提及 mock | 默认 `USE_MOCK=true`，可切真服务器（你已选"两者皆要+开关"） | 与指导书"直连"期望不同，但属你已选 | 已裁决：**默认直连真服务器**，置 `USE_MOCK=true` 可切本地 mock |
+| **C2** 数据来源 | 所有接口直接调用真服务器（`http` 模块），未提及 mock | 默认 `USE_MOCK=false` 直连真服务器，可切本地 mock（你已选"两者皆要+开关"） | 与指导书"直连"期望一致 | 已裁决：默认直连真服务器（`USE_MOCK=false`），置 `true` 可切本地 mock |
 | **C3** 绑车判断字段 | 示例代码判断 `carId==''||undefined \|\| carVin==''||undefined`，任一为空即进绑车 | 以 `carVin` 单判（贴合需求/流程节点"是否存在 carVin 属性"） | 与示例代码双判不一致（C3 已裁决） | 已裁决：**carVin 单判**（贴合需求文档，不判 carId） |
 | **C4** 自定义功能-车主商城内容 | 4.7.3 要求至少含：①车主商品 ②优惠提醒 ③收藏与心愿单 ④产品评价 | 列表+详情+收藏+**产品评价**（详情页补评价区块） | 已裁决（补齐四要素） | 已裁决：详情页补"产品评价"，贴合 4.7.3 |
 | **C5** 底部导航实现 | 推荐 `Navigation` 做模块内/跨模块导航 | 根 `Navigation` 承载底部模块切换（首页/车控/反馈/我的 四个 NavDestination + 自定义底部 Tab 栏） | 已裁决（取指导书推荐） | 已裁决：改用 `Navigation` 承载底部模块切换 |
@@ -244,7 +251,7 @@ export interface BindReq { carVin: string; }
    - 全局态键：模块顶部 `PersistentStorage.persistProp('userName','')`；组件内 `@StorageProp('userName')` 只读、`@StorageLink` 双向。
 3. **导航（C5，且与 `newtabsPage.ets` 一致）**：根 `@Entry` 页 `@Provide('navPathStack') navPathStack: NavPathStack = new NavPathStack()`；`@Builder pageMap(name, param)` 用 `if/else` 渲染各 `NavDestination(){...}.title(...)`；`build(){ Navigation(this.navPathStack){ Tabs({barPosition:BarPosition.End}){ TabContent(){...}.tabBar(...) } }.navDestination(this.pageMap) }`。列表→详情：`navPathStack.pushPath({name:'XxxDetail', param: obj})`，详情页 `param as Xxx`。底部四个 Tab：首页/车控/反馈/我的。
 4. **路由（页面级）**：`router.pushUrl({url, params})` / `router.replaceUrl` / `router.back()` / `router.getParams()`；欢迎/登录/注册/绑车用 router。
-5. **HTTP**：集中 `common/constants/HttpApi.ets` 放 `BaseUrl` + 各接口路径（`BaseUrl + '/app/login'` 风格）；`http.createHttp()` → `request(url,{method,header,extraData},(err,data)=>{...})`，结束 `httpRequest.destroy()`；成功判 `data.responseCode === http.ResponseCode.OK` 后 `JSON.parse(data.result as string)`。`common/utils/RequestUtil.ets` 封装为 Promise（**实际只实现 `post`**，后端全 POST），统一带 `Authorization: Bearer <token>`（未登录时不带）、HTTP 401 清态回登录；`USE_MOCK` 时走 `MockData.ets`。请求与响应用 `hilog`（tag `yqhHttp`）落日志。
+5. **HTTP**：集中 `common/constants/HttpApi.ets` 放 `BaseUrl` + 各接口路径（如 `BaseUrl + '/app/login'`、`BaseUrl + '/cockpit/info/{id}'` 等，详见 `HttpApi.ets`）；`http.createHttp()` → `request(url,{method,header,extraData},(err,data)=>{...})`，结束 `httpRequest.destroy()`；成功判 `data.responseCode === http.ResponseCode.OK` 后 `JSON.parse(data.result as string)`。`common/utils/RequestUtil.ets` 封装为 Promise（**GET/PUT/POST/DELETE 四方法**，按接口文档选用**），统一带 `Authorization: Bearer <token>`（未登录时不带）、响应体 `code===401` 清态回登录；`USE_MOCK` 时走 `MockData.ets`。请求与响应用 `hilog`（tag `yqhHttp`）落日志。
 6. **状态/持久化（KT7/KT10）**：用 `AppStorage` + `PersistentStorage`（既有 `MyLoginPage.ets`/`MineCom.ets` 范式）——**未采纳**指导书示例的 `preferences.getPreferencesSync` 写法，但底层同为"用户首选项"，且更贴合本工程既有规范。
 7. **样式（M9 已改：Dark Neumorphism，覆盖先前的用户色卡与暗色玻璃风）**：集中 `common/style/Style.ets` 导出拟态令牌 `NEU_DARK` / `NEU_LIGHT`，取值函数 `neu(dark)` / `neuBg(dark)`：
    - `bg0..bg3 = '#23272C' → '#191C20'`（`neuBg()` 纵向渐变，页面根容器统一使用）
@@ -275,8 +282,8 @@ export interface BindReq { carVin: string; }
   - A「我的」页加一行「车主商城」——**推荐**，代价：我的页多一行（现 3 行 → 4 行）
   - B 首页顶栏加图标——代价：顶栏已有「信息」图标，会挤
   - C 保持现状——代价：C4 自定义功能演示不到，等于没做
-- **USE_MOCK 回切**：后端 `/app/**` 放行后，把 `common/constants/HttpApi.ets` 的 `USE_MOCK` 改回 `false` 直连验收一遍。
-- **编译验证**：M9 视觉改版只做过静态自检，须在 DevEco Studio 编译 + 模拟器跑一遍（本机无 `hvigorw`/SDK）。
+- **USE_MOCK 回切**：已完成——`USE_MOCK=false`，整套 App 已直连真服务器并通过 23 个接口集成测试（见 `tests/` 与 `DECISIONS.md` D13）。
+- **编译验证**：本机命令行已可出包（`hvigorw.js assembleHap` → `BUILD SUCCESSFUL`，见 D11）；真机/模拟器运行验证待 DevEco 完成。
 - mock 数据（可选）：登录账号/密码、车辆/反馈数据按合理样例造；你有指定测试账号可告知。
 
 ---

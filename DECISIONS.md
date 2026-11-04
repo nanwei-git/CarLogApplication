@@ -24,11 +24,11 @@
 - **理由**：贴近华为官方 ArkTS-MVVM 分层，也让「数据 / 取数 / 视图」三层职责分明。
 - **影响**：SPEC §2 的旧路径（`pages/yqhcar/*`、`common/model/*`、`common/api/*`）全部失效，**已同步**。
 
-## D4 · USE_MOCK 当前为 true（与 SPEC 记录不一致）
+## D4 · USE_MOCK 当前为 false（已直连真服务器）
 
-- **决策**：`common/constants/HttpApi.ets` 的 `USE_MOCK` 现为 `true`，全量走 `MockData.ets`。
-- **理由**：真服务器 `/app/**` 返回业务码 401（后端鉴权未放行），先在模拟器验收 UI。
-- **影响**：SPEC §3「默认 false 直连」与现状不符，已在 SPEC 标注为已知偏差。后端放行后改回 `false` 即可。
+- **决策**：`common/constants/HttpApi.ets` 的 `USE_MOCK` 现为 **`false`**，整套 App 已直连真服务器 `http://121.36.14.143:10001`。
+- **理由**：后端已开放联调；按需求「整套 app 都直连真服务器」全量置 false，`MockData.ets` 仅作离线兜底。
+- **影响**：SPEC §3 现与现状一致（默认直连）。联调结论：服务器恒返回 HTTP 200，成败看响应体 `code`（200 成功 / 401 鉴权 / 500 业务）。**本条目已结案**。
 
 ## D5 · 持久化沿用 AppStorage + PersistentStorage（KT10）
 
@@ -61,10 +61,37 @@
 - **现象**：`Progress` 传 `strokeRadius`、或把 `@Builder` 内组件的 `alignSelf` 当容器属性用，都会编译报错。
 - **决策**：环形统一 `Progress({type: ProgressType.Ring}).style({strokeWidth})` + `.color()` + `.backgroundColor()`（轨道色）；居中一律放容器上。
 
-## D11 · 编译只能回 DevEco
+## D11 · 命令行可构建（推翻原"只能回 DevEco"）
 
-- **现象**：本机命令行无 `hvigorw`，`local.properties` 未配 SDK 路径。
-- **决策**：代码改动只做静态自检（引用链、括号配平），编译与运行回到 DevEco Studio。
+- **现象（原）**：本机命令行无 `hvigorw`，`local.properties` 未配 SDK 路径。
+- **现状（已推翻）**：设 `DEVECO_SDK_HOME=D:\Harmony\DevEco\DevEco Studio\sdk` 后，直接调用 `tools\hvigor\bin\hvigorw.js assembleHap` 即可命令行出包，已验证 `BUILD SUCCESSFUL`。
+- **命令示例**：
+  `& "$DEVECO\tools\node\node.exe" "$DEVECO\tools\hvigor\bin\hvigorw.js" --no-daemon -p module=entry@default -p product=default assembleHap`
+
+## D12 · 接口路径按《接口文档 V1.1》全面修正（核对联调）
+
+- **现象**：原 App 的 `ApiPath` 几乎全错（如注册写成 `/app/register`、用户信息 `/app/user/info`、车辆信息 `/app/car/info`、状态变更 `/app/car/state/change`、反馈列表 `/app/feedback/list`、日志无接口），这是当初 `/app/register` 收 401、登录异常的根因之一。
+- **决策**：对照《鸿蒙智能座舱系统接口文档 V1.1》逐接口修正，见 `common/constants/HttpApi.ets`：
+  - 登录 `POST /app/login`、注册 `POST /system/user/register`、用户信息 `GET /getInfo`（字段在响应**顶层**）
+  - 绑车 `POST /cockpit/info/bindCarVin`
+  - 车辆信息 `GET /cockpit/info/{id}`、车辆状态 `GET /cockpit/state/{carVin}`、空调变更 `PUT /cockpit/state`
+  - 车门 `POST /cockpit/control/door`、车灯 `POST /cockpit/control/light`、移动/前后左右 `POST /cockpit/control/{move|back|left|right|stop}/{carId}`
+  - 反馈列表 `GET /cockpit/feedback/backList`（**直接数组**）、详情 `GET /cockpit/feedback/{id}`、删除 `DELETE /cockpit/feedback/{ids}`
+  - 日志列表 `GET /cockpit/log/list`（**顶层** `total`/`rows`）、删除 `DELETE /cockpit/log/{ids}`
+- **连带修复**：`getInfo`/`logList` 顶层字段解析；反馈列表数组解析；`batteryPower` 由 `object` 改为 `string`（`Number()` 解析续航百分比）。
+
+## D13 · 新增后端集成测试套件（tests/）
+
+- **决策**：在 `tests/` 下用 Python `unittest` 直连真服务器，按阶段写接口集成测试（不删/不跳/不降标）。
+- **结构**：`common.py`（统一 `call` 客户端，校验响应体 `code`）+ `test_auth.py` / `test_car.py` / `test_control.py` / `test_feedback.py` / `test_logs.py` + `run_all.py`。
+- **运行**：全量 `python tests/run_all.py`；单阶段 `python tests/test_auth.py`。
+- **现状**：23 个用例全部通过（HTTP 200 + 响应体 `code===200`），覆盖登录/注册/用户信息/绑车、车辆信息/状态、空调/车门/车灯/移动、反馈列表/详情/增删、日志列表/删除，以及各接口的"无 token 鉴权"负向用例。
+
+## D14 · module.json5 不支持 allowCleartextTraffic（SDK 6.1.1）
+
+- **现象**：为让 App 直连 `http://` 后端，曾在 `module.json5` 加 `allowCleartextTraffic: true`，但该 SDK（6.1.1 / API 12）schema 不认此字段——放在 ability 层或 module 层都报 `Schema validate failed`。
+- **决策**：**不添加**该字段。
+- **理由**：实测明文 HTTP 在本 SDK 默认可用（曾收到服务器 401 即证明链路通），无需该开关；强行添加反而导致构建失败。
 
 ---
 

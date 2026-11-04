@@ -2,7 +2,8 @@
 
 ## 一句话（项目介绍）
 
-HarmonyOS NEXT 车主 App（ArkTS / ArkUI 声明式，Stage 模型 + MVVM 分层），对接若依式后端 `/app/**`：
+HarmonyOS NEXT 车主 App（ArkTS / ArkUI 声明式，Stage 模型 + MVVM 分层），对接真实后端 `http://121.36.14.143:10001`：
+仅登录为 `POST /app/login`，其余为 `POST /system/user/register`、`GET /getInfo`、`/cockpit/**` 等（详见 `common/constants/HttpApi.ets`）。
 登录 / 注册 / 绑车 → 首页看车辆状态与智能空调、车控页远程控车（门+灯+方向）、反馈模块提交与管理、
 车主商城浏览收藏、我的页换绑与退出。视觉主题为 **Dark Neumorphism（特斯拉风深色拟态）**：近黑底 +
 特斯拉红，卡片与背景同色，靠「左上亮边 + 右下暗影」双层投影造体积，全部由 ArkUI 绘制、零新增美术资产。
@@ -10,11 +11,13 @@ HarmonyOS NEXT 车主 App（ArkTS / ArkUI 声明式，Stage 模型 + MVVM 分层
 ## 怎么跑
 
 - **环境**：DevEco Studio + HarmonyOS NEXT SDK（API 12+）。打开工程根 `yqh24002240002120509` → Build → Run 到模拟器/真机。
-  ⚠️ **本机命令行无 `hvigorw`、`local.properties` 未配 SDK 路径，编译只能回 DevEco**（见 `DECISIONS.md` D11）。
-- **后端**：`http://121.36.14.143:10001`（`common/constants/HttpApi.ets`）。`USE_MOCK` 当前为 **`true`**，全量走 `MockData.ets`；
-  后端 `/app/**` 尚返回业务码 401，放行后置 `false` 直连。
+  ⚠️ 本机也可用命令行构建：设 `DEVECO_SDK_HOME` 后执行 `hvigorw.js assembleHap`（已验证可出包，详见 `DECISIONS.md` D11）。
+- **后端**：`http://121.36.14.143:10001`（`common/constants/HttpApi.ets`）。`USE_MOCK` 当前为 **`false`**，整套 App 已直连真服务器。
+  联调结论：服务器始终返回 HTTP 200，成败看响应体 `code`（200 成功 / 401 鉴权 / 500 业务）。
 - **VIN**：台架调试 `4494356c`；个人 VIN `00661718330`（不可用于台架）。
-- **联调**：HiLog 过滤 tag `yqhHttp`，可看到每次 POST 的 URL / 耗时 / 响应码 / 报文。
+- **联调**：HiLog 过滤 tag `yqhHttp`，可看到每次请求的 URL / 耗时 / 响应码 / 报文。
+- **接口集成测试**：`tests/`（Python `unittest`）直连真服务器校验每个接口的路径/方法/鉴权/响应结构。
+  全量：`python tests/run_all.py`；单阶段：`python tests/test_auth.py`（另有 `test_car/control/feedback/logs.py`）。
 
 ## 硬性约束（违反即打回）
 
@@ -27,27 +30,27 @@ HarmonyOS NEXT 车主 App（ArkTS / ArkUI 声明式，Stage 模型 + MVVM 分层
 
 ## 模块地图（代码索引）
 
-行数为实测值。车主 App 部分 **66 个 .ets / ≈ 4250 行**；课堂作业部分 51 个 / 3094 行（只读）。
+行数为实测值（含本次按接口文档 V1.1 对齐后的变动）。车主 App 部分 **66 个 .ets / ≈ 4250 行**（另有 `tests/` 下 Python 联调测试，不计入）；课堂作业部分 51 个 / 3094 行（只读）。
 
 | 层 / 目录 | 文件（行） | 职责 |
 |---|---|---|
 | **入口** | `entryability/EntryAbility.ets`（50） | Ability 生命周期，冷启动进 `pages/yqhWelcome` |
-| **页面** `pages/`（14 个） | `yqhWelcome`59、`yqhLogin`200、`yqhRegister`159、`yqhBindCar`132、`yqhIndex`142、`yqhControl`231、`yqhFeedback`242、`yqhFeedbackAdd`109、`yqhFeedbackDetail`104、`yqhLog`82、`yqhMall`150、`yqhMallDetail`158、`yqhMine`167、`yqhSettings`143 | 路由页（欢迎/登录/注册/绑车）+ Tab 页（首页/车辆控制/反馈/我的）+ NavDestination 子页（反馈增删详情、日志、商城、商品详情、设置） |
+| **页面** `pages/`（14 个） | `yqhWelcome`59、`yqhLogin`200、`yqhRegister`159、`yqhBindCar`132、`yqhIndex`142、`yqhControl`232、`yqhFeedback`241、`yqhFeedbackAdd`109、`yqhFeedbackDetail`104、`yqhLog`82、`yqhMall`150、`yqhMallDetail`158、`yqhMine`167、`yqhSettings`143 | 路由页（欢迎/登录/注册/绑车）+ Tab 页（首页/车辆控制/反馈/我的）+ NavDestination 子页（反馈增删详情、日志、商城、商品详情、设置） |
 | **业务组件** `views/comps/` | `yqhCarInfoComp`200、`yqhAirConditionComp`224 | 首页两块：车辆信息卡（环形电量表盘 + 门/灯/空调圆键）、智能空调（环形温度旋钮 + 循环/A·C/除雾） |
 | **通用组件** `common/ui/` | `yqhNeuCard`53、`yqhNeuButton`61、`yqhNeuCircleButton`99、`yqhNeuRing`58、`yqhNeuToggle`55、`yqhNeuTabItem`39、`yqhNeuChip`38 | 拟态组件库：卡片 / 按钮 / 圆键 / 环形表盘 / 开关 / Tab 项 / 徽标。业务页只组装 |
-| **接口函数** `viewmodel/` | `auth`36、`car`49、`feedback`61、`mall`12 | 登录注册绑车、车辆信息状态移动日志、反馈增删查、商城列表收藏 |
-| **模型** `model/` | `ApiReq`61、`CarInfoBean`50、`CarStateBean`36、`CarLogBean`23、`FeedBackBean`46、`MallBean`50、`UserInfoBean`13、`IResult`6 | 请求体 + `parseXxx` 解析 |
-| **基础设施** `common/` | `utils/RequestUtil`57、`utils/StorageUtils`97、`utils/MockData`360、`constants/HttpApi`39、`constants/Constants`47、`style/Style`152 | 统一 POST（Bearer + 401 清态 + hilog）、持久化键（KT10）、本地 mock、接口路径/开关、数值表、设计令牌 |
+| **接口函数** `viewmodel/` | `auth`39、`car`78、`feedback`43、`mall`12 | 登录注册绑车、车辆信息状态移动日志、反馈增删查、商城列表收藏 |
+| **模型** `model/` | `ApiReq`68、`CarInfoBean`42、`CarStateBean`36、`CarLogBean`23、`FeedBackBean`46、`MallBean`50、`UserInfoBean`13、`IResult`6 | 请求体 + `parseXxx` 解析 |
+| **基础设施** `common/` | `utils/RequestUtil`79、`utils/StorageUtils`97、`utils/MockData`359、`constants/HttpApi`56、`constants/Constants`47、`style/Style`152 | 统一 GET/PUT/POST/DELETE（Bearer + 401 清态 + hilog）、持久化键（KT10）、本地 mock、接口路径/开关、数值表、设计令牌 |
 | **遗留（未引用）** `views/` | `yqhGlassCard`20、`yqhButton`29、`yqhToggle`43 | 旧浅色玻璃风组件，车主 App 已不引用，保留待清 |
 | **课堂作业（只读）** | `pages/leson*`、`pages/zuoye*`、`pages/login`、`pages/Perferences`、`pages/Index.ets`（3094） | 课程草稿，隔离区 |
 
 ## 架构要点
 
-- **数据流**：页面 `aboutToAppear` → `viewmodel/xxx` 函数 →（`USE_MOCK` ? `MockData` : `RequestUtil.post`）→ `model` 的 `parseXxx` → 写入 `@State` 渲染。
+- **数据流**：页面 `aboutToAppear` → `viewmodel/xxx` 函数 →（`USE_MOCK` ? `MockData` : `RequestUtil` 统一 GET/PUT/POST/DELETE）→ `model` 的 `parseXxx` → 写入 `@State` 渲染。
 - **状态**：页面内 `@State`；跨页 `@Provide/@Consume('navPathStack')`；应用级 `AppStorage` + `PersistentStorage`（键名集中 `StorageUtils.ets`）。
 - **导航分工（C5）**：欢迎/登录/注册/绑车用 `@ohos.router`（须 `@Entry`，注册在 `main_pages.json`）；首页用根 `Navigation` + `NavPathStack` + `Tabs`（4 个 Tab），详情用 `pushPath` 渲染 `NavDestination`。
   子页名：`Log`、`FeedbackAdd`、`FeedbackList`、`FeedbackDetail`、`Settings`、`Mall`、`MallDetail`。
-- **鉴权**：token 存 `AppStorage('token')`，`RequestUtil` 带 `Bearer <token>`；HTTP 401 → `clearSession()` + 跳登录页。
+- **鉴权**：token 存 `AppStorage('token')`，`RequestUtil` 带 `Bearer <token>`；HTTP 401（响应体 `code===401`）→ `clearSession()` + 跳登录页。
 - **主题**：`@StorageProp('darkMode')` + `neu()` 令牌；设置页开关切换（KT10 持久化）。
 - **配置**：`HttpApi.ets` 的 `BaseUrl` 与 `USE_MOCK` 是唯一的后端开关点。
 
@@ -74,10 +77,11 @@ HarmonyOS NEXT 车主 App（ArkTS / ArkUI 声明式，Stage 模型 + MVVM 分层
 ## 已知坑
 
 1. **车主商城页没有入口**：`pageMap` 注册了 `Mall` 子页，但没有任何页面 `pushPath({name:'Mall'})`；「我的」页只有 绑定车辆/我的反馈/设置 三行。验收 C4 时点不到（见 `DECISIONS.md` D9，**待裁决**）。
-2. `USE_MOCK` 当前为 `true`，与 SPEC §3 记录的「默认 `false` 直连」不符（后端 401 所致）。
+2. `USE_MOCK` 当前为 `false`，整套 App 已直连真服务器；`MockData.ets` 仅作离线兜底。
 3. `darkMode` 持久化默认值已改为 `true`；设备上若已存过 `false`，需在设置页手动打开。
 4. `Progress` 不支持 `strokeRadius`（也没有 `ProgressType.Circular`）；环形只能用 `.type(ProgressType.Ring).style({strokeWidth})`，`@Builder` 内别用 `alignSelf`。
-5. 本机不编译：改动只做静态自检（引用链 + 括号配平），编译回 DevEco。
+5. 本机可用命令行构建：设 `DEVECO_SDK_HOME` 后执行 `hvigorw.js assembleHap` 即可出包（已验证 `BUILD SUCCESSFUL`）。
+6. 联调测试套件在 `tests/`（Python `unittest`）：`python tests/run_all.py` 一键跑全部 23 个接口集成用例；按阶段分 `test_auth/car/control/feedback/logs.py`。
 
 ## 协作
 
